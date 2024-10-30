@@ -1,0 +1,53 @@
+# Qt specific
+*.pro.user
+*.pro.user.*
+*.pro.user*.pri
+*.qmake.stash
+*.moc
+*.cpp~          # Backup files
+*.h~            # Backup files
+*.o              # Object files
+*.dll            # Dynamic link libraries (Windows)
+*.exe            # Executable files (Windows)
+*.so             # Shared libraries (Linux)
+*.dSYM           # Mac debug symbols
+*.app            # Mac application bundle
+*.tgz            # Compressed files
+*.tar.gz         # Compressed files
+*.log            # Log files
+*.pid            # Process ID files
+*.tmp            # Temporary files
+
+# Build directory
+build-*/        # Ignore all build directories
+*/build-*/      # Ignore all build directories in subdirectories
+debug/          # Debug build directory
+release/        # Release build directory
+build/
+.qtc_clangd/
+
+# IDE files
+*.kdevelop*
+*.idea/
+*.vs/
+*.xcodeproj/
+*.xcodeproj*
+*.swp            # Swap files (from vi)
+*.swo            # Swap files (from vi)
+
+# CMake files
+CMakeFiles/     # CMake generated files
+CMakeCache.txt  # CMake cache
+Makefile        # Generated makefile
+
+# Ignore Qt's ui files if they are generated
+*.ui.h          # Generated from .ui files
+
+# Ignore QT .qmlc files
+*.qmlc
+
+# Ignore version control files
+*.git/
+# System files
+.DS_Store       # macOS Finder metadata
+Thumbs.db       # Windows thumbnail cache
