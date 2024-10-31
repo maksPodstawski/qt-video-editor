@@ -26,6 +26,9 @@ release/        # Release build directory
 build/
 .qtc_clangd/
 
+/debug/
+debug/
+
 # IDE files
 *.kdevelop*
 *.idea/
