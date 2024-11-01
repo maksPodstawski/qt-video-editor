@@ -14,14 +14,15 @@ class VideoPreviewWidget : public QWidget
 public:
     explicit VideoPreviewWidget(QWidget *parent = nullptr);
 
-    void setVideoFile(const QString &videoPath);
     void play();
     void pause();
     void stop();
+    void setVideoFile(const QString &videoPath);
     void setPosition(qint64 position);
+    void setVolume(float volume);
     qint64 getDuration();
     qint64 getPosition();
-
+    float getVolume() const;
 
 private:
 

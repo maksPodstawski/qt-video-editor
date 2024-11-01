@@ -49,3 +49,12 @@ qint64 VideoPreviewWidget::getPosition()
 {
     return mediaPlayer->position();
 }
+
+void VideoPreviewWidget::setVolume(float volume)
+{
+    audioOutput->setVolume(volume);
+}
+
+float VideoPreviewWidget::getVolume() const {
+    return audioOutput->volume();
+}

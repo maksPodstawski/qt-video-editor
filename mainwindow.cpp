@@ -51,6 +51,12 @@ MainWindow::MainWindow(QWidget *parent)
             );
     });
 
+    ui->volumeChangeSlider->setRange(0, 100);
+    ui->volumeChangeSlider->setValue(50);
+    connect(ui->volumeChangeSlider, &QSlider::valueChanged, this, [this](int value) {
+        videoPreviewWidget->setVolume(value / 100.0);
+    });
+
 }
 
 MainWindow::~MainWindow()
@@ -58,13 +64,62 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::on_playButton_clicked()
+{
+    videoPreviewWidget->play();
+    ui->playButton->setEnabled(false);
+    ui->pauseButton->setEnabled(true);
+}
+
+
+void MainWindow::on_pauseButton_clicked()
+{
+    videoPreviewWidget->pause();
+    ui->pauseButton->setEnabled(false);
+    ui->playButton->setEnabled(true);
+}
+
+
+void MainWindow::on_actionOpen_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Select video file"), "", tr("MP4 files (*.mp4)"));
     if (!filename.isEmpty()) {
         videoPreviewWidget->setVideoFile(filename);
-        videoPreviewWidget->play();
 
+        ui->pauseButton->setEnabled(false);
         positionUpdateTimer->start(1000);
     }
 }
+
+
+void MainWindow::on_volumeChangeSlider_valueChanged(int value)
+{
+    float volume = static_cast<float>(value) / 100;
+    videoPreviewWidget->setVolume(volume);
+    ui->volumeLCD->display(value);
+
+    if(volume > 0 && ui->muteButton->text() == "Unmute") {
+        ui->muteButton->setText("Mute");
+    }
+}
+
+
+void MainWindow::on_muteButton_clicked()
+{
+    if(videoPreviewWidget->getVolume() > 0) {
+        previousVolume = videoPreviewWidget->getVolume();
+        videoPreviewWidget->setVolume(0.0);
+
+        ui->muteButton->setText("Unmute");
+        ui->volumeChangeSlider->setValue(0);
+    }
+    else {
+        videoPreviewWidget->setVolume(previousVolume);
+        ui->muteButton->setText("Mute");
+        ui->volumeChangeSlider->setValue(previousVolume * 100);
+    }
+}
+
+
+

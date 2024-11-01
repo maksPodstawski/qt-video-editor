@@ -23,12 +23,18 @@ public:
     ~MainWindow();
 
 private slots:
+
+    void on_actionOpen_triggered();
+    void on_muteButton_clicked();
+    void on_volumeChangeSlider_valueChanged(int value);
     void on_playButton_clicked();
+    void on_pauseButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     VideoPreviewWidget *videoPreviewWidget;
     QTimer *positionUpdateTimer;
     bool isSliderBeingMoved = false;
+    float previousVolume;
 };
 #endif // MAINWINDOW_H
