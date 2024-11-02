@@ -36,5 +36,8 @@ private:
     QTimer *positionUpdateTimer;
     bool isSliderBeingMoved = false;
     float previousVolume;
+
+    void updateVideoTimeSlider();
+    void updateDurationLabel();
 };
 #endif // MAINWINDOW_H

@@ -41,7 +41,11 @@ debug/
 # CMake files
 CMakeFiles/     # CMake generated files
 CMakeCache.txt  # CMake cache
+
+# Ignore Makefiles
 Makefile        # Generated makefile
+Makefile.Debug
+Makefile.Release
 
 # Ignore Qt's ui files if they are generated
 *.ui.h          # Generated from .ui files

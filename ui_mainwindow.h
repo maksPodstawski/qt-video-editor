@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLCDNumber>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -30,12 +31,13 @@ public:
     QAction *actionOpen;
     QWidget *centralwidget;
     QGroupBox *groupBoxVideo;
-    QSlider *previewVideoTimeSlider;
     QSlider *volumeChangeSlider;
     QPushButton *playButton;
     QPushButton *muteButton;
     QLCDNumber *volumeLCD;
     QPushButton *pauseButton;
+    QLabel *timeLabel;
+    QSlider *previewVideoTimeSlider;
     QMenuBar *menubar;
     QMenu *menuFile;
     QStatusBar *statusbar;
@@ -52,10 +54,6 @@ public:
         groupBoxVideo = new QGroupBox(centralwidget);
         groupBoxVideo->setObjectName("groupBoxVideo");
         groupBoxVideo->setGeometry(QRect(370, 20, 501, 371));
-        previewVideoTimeSlider = new QSlider(groupBoxVideo);
-        previewVideoTimeSlider->setObjectName("previewVideoTimeSlider");
-        previewVideoTimeSlider->setGeometry(QRect(10, 350, 471, 20));
-        previewVideoTimeSlider->setOrientation(Qt::Orientation::Horizontal);
         volumeChangeSlider = new QSlider(centralwidget);
         volumeChangeSlider->setObjectName("volumeChangeSlider");
         volumeChangeSlider->setGeometry(QRect(920, 140, 16, 160));
@@ -73,6 +71,19 @@ public:
         pauseButton = new QPushButton(centralwidget);
         pauseButton->setObjectName("pauseButton");
         pauseButton->setGeometry(QRect(70, 230, 80, 24));
+        timeLabel = new QLabel(centralwidget);
+        timeLabel->setObjectName("timeLabel");
+        timeLabel->setGeometry(QRect(110, 380, 161, 21));
+        QFont font;
+        font.setPointSize(12);
+        font.setBold(true);
+        timeLabel->setFont(font);
+        timeLabel->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        previewVideoTimeSlider = new QSlider(centralwidget);
+        previewVideoTimeSlider->setObjectName("previewVideoTimeSlider");
+        previewVideoTimeSlider->setGeometry(QRect(360, 429, 511, 31));
+        previewVideoTimeSlider->setOrientation(Qt::Orientation::Horizontal);
+        previewVideoTimeSlider->setTickPosition(QSlider::TickPosition::TicksBothSides);
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
@@ -100,6 +111,7 @@ public:
         playButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
         pauseButton->setText(QCoreApplication::translate("MainWindow", "Pause", nullptr));
+        timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
     } // retranslateUi
 

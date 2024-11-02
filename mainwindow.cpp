@@ -23,16 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     positionUpdateTimer = new QTimer(this);
 
-    connect(positionUpdateTimer, &QTimer::timeout, this, [this]() {
-        if (videoPreviewWidget->getDuration() > 0) {
-            qint64 currentPosition = videoPreviewWidget->getPosition();
-            qint64 duration = videoPreviewWidget->getDuration();
-            int sliderPosition = (currentPosition * 100) / duration;
-
-            ui->previewVideoTimeSlider->setValue(sliderPosition);
-
-        }
-    });
+    connect(positionUpdateTimer, &QTimer::timeout, this, &MainWindow::updateVideoTimeSlider);
 
     connect(ui->previewVideoTimeSlider, &QSlider::sliderPressed, this, [this]() {
         isSliderBeingMoved = true;
@@ -57,6 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
         videoPreviewWidget->setVolume(value / 100.0);
     });
 
+    connect(positionUpdateTimer, &QTimer::timeout, this, [this]() {
+        updateDurationLabel();
+    });
 }
 
 MainWindow::~MainWindow()
@@ -120,6 +114,29 @@ void MainWindow::on_muteButton_clicked()
         ui->volumeChangeSlider->setValue(previousVolume * 100);
     }
 }
+
+void MainWindow::updateDurationLabel()
+{
+    if (videoPreviewWidget->getDuration() > 0) {
+        qint64 currentPosition = videoPreviewWidget->getPosition();
+        qint64 duration = videoPreviewWidget->getDuration();
+
+        QTime currentTime = QTime::fromMSecsSinceStartOfDay(currentPosition);
+        QTime totalTime = QTime::fromMSecsSinceStartOfDay(duration);
+        ui->timeLabel->setText(currentTime.toString("hh:mm:ss") + " / " + totalTime.toString("hh:mm:ss"));
+    }
+}
+
+void MainWindow::updateVideoTimeSlider() {
+    if (videoPreviewWidget->getDuration() > 0) {
+        qint64 currentPosition = videoPreviewWidget->getPosition();
+        qint64 duration = videoPreviewWidget->getDuration();
+        int sliderPosition = (currentPosition * 100) / duration;
+
+        ui->previewVideoTimeSlider->setValue(sliderPosition);
+    }
+}
+
 
 
 
