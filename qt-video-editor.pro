@@ -11,11 +11,15 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    videoperviewwidget.cpp
+    timelinewidget.cpp \
+    videoperviewwidget.cpp \
+    videotablewidget.cpp
 
 HEADERS += \
     mainwindow.h \
-    videoperviewwidget.h
+    timelinewidget.h \
+    videoperviewwidget.h \
+    videotablewidget.h
 
 FORMS += \
     mainwindow.ui

@@ -11,13 +11,25 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , videoPreviewWidget(new VideoPreviewWidget(this))
+    , videoTable(new VideoTableWidget(this))
+    , timeLine(new TimelineWidget(this))
 {
     ui->setupUi(this);
-    videoPreviewWidget = new VideoPreviewWidget(this);
 
     QVBoxLayout *layout = new QVBoxLayout(ui->groupBoxVideo);
     layout->addWidget(videoPreviewWidget);
     ui->groupBoxVideo->setLayout(layout);
+
+
+    QVBoxLayout *videoTableLayout = new QVBoxLayout(ui->groupBoxVideosTable);
+    videoTableLayout->addWidget(videoTable);
+    ui->groupBoxVideosTable->setLayout(videoTableLayout);
+
+
+    QVBoxLayout *videoTimeLineLayout = new QVBoxLayout(ui->graphicsViewTimeLine);
+    videoTimeLineLayout->addWidget(timeLine);
+    ui->graphicsViewTimeLine->setLayout(videoTimeLineLayout);
 
     ui->previewVideoTimeSlider->setRange(0, 100);
 
@@ -77,12 +89,15 @@ void MainWindow::on_pauseButton_clicked()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Select video file"), "", tr("MP4 files (*.mp4)"));
-    if (!filename.isEmpty()) {
-        videoPreviewWidget->setVideoFile(filename);
-
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select video files"), "", tr("Video Files (*.mp4 *.avi *.mov)"));
+    if (!fileNames.isEmpty()) {
+        QList<QString> videoFiles = fileNames.toVector().toList();
+        videoPreviewWidget->setVideoFiles(videoFiles);
+       // videoPreviewWidget->play();
         ui->pauseButton->setEnabled(false);
         positionUpdateTimer->start(1000);
+
+        videoTable->updateTable(videoFiles);
     }
 }
 

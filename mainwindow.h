@@ -7,6 +7,8 @@
 #include <QMediaPlayer>
 #include <QTimer>
 #include "videoperviewwidget.h"
+#include "videotablewidget.h"
+#include "timelinewidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -33,6 +35,9 @@ private slots:
 private:
     Ui::MainWindow *ui;
     VideoPreviewWidget *videoPreviewWidget;
+    VideoTableWidget *videoTable;
+    TimelineWidget *timeLine;
+
     QTimer *positionUpdateTimer;
     bool isSliderBeingMoved = false;
     float previousVolume;

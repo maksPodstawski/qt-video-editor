@@ -4,7 +4,8 @@ VideoPreviewWidget::VideoPreviewWidget(QWidget *parent)
     : QWidget{parent},
     mediaPlayer(new QMediaPlayer(this)),
     videoWidget(new QVideoWidget(this)),
-    audioOutput(new QAudioOutput(this))
+    audioOutput(new QAudioOutput(this)),
+    currentVideoIndex(0)
 {
     mediaPlayer->setVideoOutput(videoWidget);
     mediaPlayer->setAudioOutput(audioOutput);
@@ -14,6 +15,12 @@ VideoPreviewWidget::VideoPreviewWidget(QWidget *parent)
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(videoWidget);
     setLayout(layout);
+
+    connect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia) {
+            playNextVideo();
+        }
+    });
 }
 
 void VideoPreviewWidget::play()
@@ -35,9 +42,13 @@ void VideoPreviewWidget::setPosition(qint64 position)
     mediaPlayer->setPosition(position);
 }
 
-void VideoPreviewWidget::setVideoFile(const QString &filePath)
+void VideoPreviewWidget::setVideoFiles(const QList<QString> &files)
 {
-    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    videoFiles = files;
+    currentVideoIndex = 0;
+    if (!videoFiles.isEmpty()) {
+        mediaPlayer->setSource(QUrl::fromLocalFile(videoFiles[currentVideoIndex]));
+    }
 }
 
 qint64 VideoPreviewWidget::getDuration()
@@ -57,4 +68,15 @@ void VideoPreviewWidget::setVolume(float volume)
 
 float VideoPreviewWidget::getVolume() const {
     return audioOutput->volume();
+}
+
+void VideoPreviewWidget::playNextVideo()
+{
+    if(++currentVideoIndex < videoFiles.size()){
+        mediaPlayer->setSource(QUrl::fromLocalFile(videoFiles[currentVideoIndex]));
+        mediaPlayer->play();
+    }
+    else{
+        currentVideoIndex = 0;
+    }
 }

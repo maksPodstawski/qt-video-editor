@@ -26,6 +26,8 @@ release/        # Release build directory
 build/
 .qtc_clangd/
 
+Makefile
+
 /debug/
 debug/
 
