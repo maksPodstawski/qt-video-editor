@@ -7,6 +7,9 @@
 #include <QMimeData>
 #include <QGraphicsTextItem>
 #include <QFileInfo>
+#include <QDrag>
+#include <QApplication>
+#include "Video.h"
 
 class TimelineWidget : public QGraphicsView
 {
@@ -14,15 +17,20 @@ class TimelineWidget : public QGraphicsView
 public:
     explicit TimelineWidget(QWidget *parent = nullptr);
 
+
 protected:
-    void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
-    void addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos);
+    void dropEvent(QDropEvent *event) override;
 
 private:
     QGraphicsScene *scene;
+    QGraphicsItem *draggedItem;
+    QPoint dragStartPos;
+
+    void addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos);
+
+
 };
 
 #endif // TIMELINEWIDGET_H

@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     positionUpdateTimer = new QTimer(this);
 
+
     connect(positionUpdateTimer, &QTimer::timeout, this, &MainWindow::updateVideoTimeSlider);
 
     connect(ui->previewVideoTimeSlider, &QSlider::sliderPressed, this, [this]() {

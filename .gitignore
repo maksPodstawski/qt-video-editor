@@ -28,6 +28,9 @@ build/
 
 Makefile
 
+/cmake-build-debug-visual-studio/
+/cmake-build-debug/
+
 /debug/
 debug/
 

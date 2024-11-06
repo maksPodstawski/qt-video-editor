@@ -1,8 +1,11 @@
+
 #include "timelinewidget.h"
+#include "videotablewidget.h"
 
 TimelineWidget::TimelineWidget(QWidget *parent)
-    : QGraphicsView(parent),
-    scene(new QGraphicsScene(this))
+        : QGraphicsView(parent),
+          scene(new QGraphicsScene(this)),
+          draggedItem(nullptr)
 {
     setScene(scene);
     setAcceptDrops(true);
@@ -11,7 +14,6 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     QRectF sceneRect(-100, -50, 1000, 200);
     scene->setSceneRect(sceneRect);
-
 
     QGraphicsRectItem *timelinePath = new QGraphicsRectItem(sceneRect);
     timelinePath->setBrush(QBrush(QColor(50, 55, 65)));
@@ -24,41 +26,71 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     }
 }
 
-void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
-{
-    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
-        event->accept();
-        event->acceptProposedAction();
-        qDebug() << "Accepting drag with model data";
-    } else {
+
+void TimelineWidget::dropEvent(QDropEvent *event) {
+    qDebug() << "Drop event";
+    qDebug() << "Mime formats:" << event->mimeData()->formats();
+
+    if (!event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+        qDebug() << "Invalid mime format";
         event->ignore();
-        qDebug() << "Ignoring drag - wrong format";
+        return;
     }
-}
 
-void TimelineWidget::dragMoveEvent(QDragMoveEvent *event)
-{
-    qDebug() << "DragMove event";
+    QByteArray itemData = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
+    QDataStream stream(itemData);
+
+    QString filePath, duration;
+    while (!stream.atEnd()) {
+        int row, col;
+        QMap<int, QVariant> valueMap;
+        stream >> row >> col >> valueMap;
+
+        qDebug() << "Reading data for column:" << col;
+        qDebug() << "ValueMap contents:" << valueMap;
+
+        if (col == 0) {
+            filePath = valueMap.value(Qt::UserRole).toString();
+        } else if (col == 1) {
+            duration = valueMap.value(Qt::DisplayRole).toString();
+        }
+    }
+
+    qDebug() << "Extracted data:";
+    qDebug() << "FilePath:" << filePath;
+    qDebug() << "Duration:" << duration;
+
+    if (filePath.isEmpty()) {
+        qDebug() << "File path is empty";
+        event->ignore();
+        return;
+    }
+
+    QPointF scenePos = mapToScene(event->position().toPoint());
+    if (duration.isEmpty()) {
+        qDebug() << "Duration is empty, using default value";
+        duration = "00:00";
+    }
+
+    addVideoItem(filePath, duration, scenePos);
     event->accept();
-    event->acceptProposedAction();
 }
 
-void TimelineWidget::addVideoItem(const QString &filePath,const QString &duration, const QPointF &pos)
+void TimelineWidget::addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos)
 {
     int totalSeconds = QTime::fromString(duration, "mm:ss").msecsSinceStartOfDay() / 1000;
 
     const int rectWidth = 15 * totalSeconds;
     const int rectHeight = 30;
 
-    QGraphicsRectItem *videoItem = new QGraphicsRectItem();
+    auto *videoItem = new QGraphicsRectItem();
     videoItem->setRect(0, 0, rectWidth, rectHeight);
     videoItem->setPos(pos);
     videoItem->setBrush(QBrush(Qt::lightGray));
     videoItem->setData(Qt::UserRole, filePath);
 
-
     QFileInfo fileInfo(filePath);
-    QGraphicsTextItem *textItem = new QGraphicsTextItem(videoItem);
+    auto *textItem = new QGraphicsTextItem(videoItem);
 
     QFont font = textItem->font();
     font.setPointSize(8);
@@ -82,58 +114,17 @@ void TimelineWidget::addVideoItem(const QString &filePath,const QString &duratio
              << "at position:" << pos;
 }
 
-void TimelineWidget::dropEvent(QDropEvent *event)
+void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << "Drop event";
-    qDebug() << "Mime formats:" << event->mimeData()->formats();
-
+    qDebug() << event->mimeData()->formats();
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
-        QByteArray itemData = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
-        QDataStream stream(itemData);
-
-        QString filePath;
-        QString duration;
-
-        while (!stream.atEnd()) {
-            int row, col;
-            QMap<int, QVariant> valueMap;
-            stream >> row >> col >> valueMap;
-
-            qDebug() << "Reading data for column:" << col;
-            qDebug() << "ValueMap contents:" << valueMap;
-
-            if (col == 0) {
-                filePath = valueMap.value(Qt::UserRole).toString();
-            } else if (col == 1) {
-                duration = valueMap.value(Qt::DisplayRole).toString();
-            }
-        }
-
-        qDebug() << "Extracted data:";
-        qDebug() << "FilePath:" << filePath;
-        qDebug() << "Duration:" << duration;
-
-        if (!filePath.isEmpty()) {
-            QPointF scenePos = mapToScene(event->position().toPoint());
-
-            if (duration.isEmpty()) {
-                qDebug() << "Duration is empty, using default value";
-                duration = "00:00";
-            }
-
-            addVideoItem(filePath, duration, scenePos);
-            event->accept();
-        } else {
-            qDebug() << "File path is empty";
-            event->ignore();
-        }
+        event->accept();
     } else {
-        qDebug() << "Invalid mime format";
         event->ignore();
     }
 }
 
-void TimelineWidget::dragLeaveEvent(QDragLeaveEvent *event)
+void TimelineWidget::dragMoveEvent(QDragMoveEvent *event)
 {
-    event->accept();
+    event->acceptProposedAction();
 }

@@ -11,6 +11,8 @@
 #include <QMimeData>
 #include <QDrag>
 #include <QPainter>
+#include <QMouseEvent>
+#include <QApplication>
 
 class VideoTableWidget : public QWidget
 {
@@ -18,16 +20,19 @@ class VideoTableWidget : public QWidget
 public:
     explicit VideoTableWidget(QWidget *parent = nullptr);
     void updateTable(const QList<QString> &videoFiles);
+    static QString getDurationText(const QString &filePath);
 
 protected:
-    void startDrag(Qt::DropActions supportedActions);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    QString getDurationText(const QString &filePath);
     QTableWidget *tableWidget;
+    void startDrag(const QPoint &pos);
+    QByteArray serializeRow(int row) const;
+    QPoint dragStartPosition;
 
 
-signals:
 };
 
 #endif // VIDEOTABLEWIDGET_H
