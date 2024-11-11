@@ -12,8 +12,9 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     setBackgroundBrush(QBrush(QColor(40, 44, 52)));
 
-    QRectF sceneRect(-100, -50, 1000, 200);
+    QRectF sceneRect(-100, -50, 5000, 200);
     scene->setSceneRect(sceneRect);
+    sceneStartY = sceneRect.top();
 
     QGraphicsRectItem *timelinePath = new QGraphicsRectItem(sceneRect);
     timelinePath->setBrush(QBrush(QColor(50, 55, 65)));
@@ -21,13 +22,14 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     scene->addItem(timelinePath);
 
     QPen gridPen(QColor(60, 65, 75));
-    for (int x = 0; x < sceneRect.width(); x += 100) {
-        scene->addLine(x, sceneRect.top(), x, sceneRect.bottom(), gridPen);
+    for (int y = sceneRect.top(); y < sceneRect.bottom(); y += 30) {
+        scene->addLine(sceneRect.left(), y, sceneRect.right(), y, gridPen);
     }
 }
 
 
-void TimelineWidget::dropEvent(QDropEvent *event) {
+void TimelineWidget::dropEvent(QDropEvent *event)
+{
     qDebug() << "Drop event";
     qDebug() << "Mime formats:" << event->mimeData()->formats();
 
@@ -66,6 +68,9 @@ void TimelineWidget::dropEvent(QDropEvent *event) {
         return;
     }
 
+    filmsList.append(filePath);
+    qDebug() << "Films list: " << filmsList;
+
     QPointF scenePos = mapToScene(event->position().toPoint());
     if (duration.isEmpty()) {
         qDebug() << "Duration is empty, using default value";
@@ -85,9 +90,13 @@ void TimelineWidget::addVideoItem(const QString &filePath, const QString &durati
 
     auto *videoItem = new QGraphicsRectItem();
     videoItem->setRect(0, 0, rectWidth, rectHeight);
-    videoItem->setPos(pos);
+
+    qreal snappedY = snapToNearestLine(pos.y());
+    videoItem->setPos(pos.x(), snappedY);
     videoItem->setBrush(QBrush(Qt::lightGray));
     videoItem->setData(Qt::UserRole, filePath);
+
+    videoItem->setFlag(QGraphicsItem::ItemIsMovable);
 
     QFileInfo fileInfo(filePath);
     auto *textItem = new QGraphicsTextItem(videoItem);
@@ -108,6 +117,7 @@ void TimelineWidget::addVideoItem(const QString &filePath, const QString &durati
     qreal textX = (rectWidth - textRect.width()) / 2;
     qreal textY = (rectHeight - textRect.height()) / 2;
     textItem->setPos(textX, textY);
+
     scene->addItem(videoItem);
 
     qDebug() << "Added video item for file:" << filePath
@@ -127,4 +137,64 @@ void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
 void TimelineWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
+}
+
+void TimelineWidget::wheelEvent(QWheelEvent *event)
+{
+    if(event->modifiers() & Qt::ControlModifier) {
+        if(event->angleDelta().y() > 0) {
+            scale(1.1,1);
+        }
+        else {
+            scale(0.9, 1);
+        }
+        event->accept();
+    }
+    else {
+        QGraphicsView::wheelEvent(event);
+    }
+}
+
+int TimelineWidget::snapToNearestLine(qreal yPos)
+{
+    const int lineHeight = 30;
+    qreal snapped = sceneStartY + qRound((yPos - sceneStartY) / lineHeight) * lineHeight;
+    qDebug() << "snapToNearestLine: yPos =" << yPos << ", snappedY =" << snapped;
+    return snapped;
+}
+
+void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if (draggedItem && event->buttons() & Qt::LeftButton) {
+        QPointF scenePos = mapToScene(event->pos());
+        qreal snappedY = snapToNearestLine(scenePos.y());
+        draggedItem->setPos(scenePos.x(), snappedY);
+        qDebug() << "Moved item to:" << draggedItem->pos();
+        event->accept();
+    }
+    else {
+        QGraphicsView::mouseMoveEvent(event);
+    }
+}
+
+void TimelineWidget::mousePressEvent(QMouseEvent *event)
+{
+    QPointF scenePos = mapToScene(event->pos());
+    QGraphicsItem *item = scene->itemAt(scenePos, QTransform());
+
+    if (item && item->flags() & QGraphicsItem::ItemIsMovable) {
+        draggedItem = item;
+        qDebug() << "Dragging item:" << item;
+    }
+    else {
+        draggedItem = nullptr;
+    }
+    QGraphicsView::mousePressEvent(event);
+}
+
+void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    qDebug() << "Released item";
+    draggedItem = nullptr;
+    QGraphicsView::mouseReleaseEvent(event);
 }

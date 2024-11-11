@@ -26,7 +26,8 @@ add_executable(video_editor
         timelinewidget.cpp
         timelinewidget.h
         Video.cpp
-        Video.h)
+        Video.h
+)
 
 target_link_libraries(video_editor
         Qt::Core

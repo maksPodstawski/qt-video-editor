@@ -22,15 +22,22 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    int snapToNearestLine(qreal yPos);
+
 
 private:
     QGraphicsScene *scene;
     QGraphicsItem *draggedItem;
     QPoint dragStartPos;
+    qreal sceneStartY;
 
     void addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos);
 
-
+    QList<QString> filmsList;
 };
 
 #endif // TIMELINEWIDGET_H
