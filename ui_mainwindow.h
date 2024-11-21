@@ -89,14 +89,14 @@ public:
         previewVideoTimeSlider->setTickPosition(QSlider::TickPosition::TicksBothSides);
         groupBoxVideosTable = new QGroupBox(centralwidget);
         groupBoxVideosTable->setObjectName("groupBoxVideosTable");
-        groupBoxVideosTable->setGeometry(QRect(30, 70, 421, 311));
+        groupBoxVideosTable->setGeometry(QRect(30, 30, 451, 371));
         graphicsViewTimeLine = new QGraphicsView(centralwidget);
         graphicsViewTimeLine->setObjectName("graphicsViewTimeLine");
-        graphicsViewTimeLine->setGeometry(QRect(70, 430, 1131, 192));
+        graphicsViewTimeLine->setGeometry(QRect(30, 430, 1171, 192));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 1304, 21));
+        menubar->setGeometry(QRect(0, 0, 1304, 22));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName("menuFile");
         MainWindow->setMenuBar(menubar);
@@ -121,7 +121,7 @@ public:
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
         pauseButton->setText(QCoreApplication::translate("MainWindow", "Pause", nullptr));
         timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
-        groupBoxVideosTable->setTitle(QCoreApplication::translate("MainWindow", "GroupBox", nullptr));
+        groupBoxVideosTable->setTitle(QString());
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
     } // retranslateUi
 

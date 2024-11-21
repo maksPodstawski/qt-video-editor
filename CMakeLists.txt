@@ -25,8 +25,10 @@ add_executable(video_editor
         videotablewidget.h
         timelinewidget.cpp
         timelinewidget.h
-        Video.cpp
-        Video.h
+        VideoData.cpp
+        VideoData.h
+        AudioData.cpp
+        AudioData.h
 )
 
 target_link_libraries(video_editor

@@ -134,21 +134,21 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>70</y>
-      <width>421</width>
-      <height>311</height>
+      <y>30</y>
+      <width>451</width>
+      <height>371</height>
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string/>
     </property>
    </widget>
    <widget class="QGraphicsView" name="graphicsViewTimeLine">
     <property name="geometry">
      <rect>
-      <x>70</x>
+      <x>30</x>
       <y>430</y>
-      <width>1131</width>
+      <width>1171</width>
       <height>192</height>
      </rect>
     </property>
@@ -160,7 +160,7 @@
      <x>0</x>
      <y>0</y>
      <width>1304</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

@@ -33,13 +33,15 @@ void VideoPreviewWidget::stop()
     mediaPlayer->stop();
 }
 
-void VideoPreviewWidget::pause(){
+void VideoPreviewWidget::pause()
+{
     mediaPlayer->pause();
 }
 
 void VideoPreviewWidget::setPosition(qint64 position)
 {
     mediaPlayer->setPosition(position);
+
 }
 
 void VideoPreviewWidget::setVideoFiles(const QList<QString> &files)
@@ -66,17 +68,20 @@ void VideoPreviewWidget::setVolume(float volume)
     audioOutput->setVolume(volume);
 }
 
-float VideoPreviewWidget::getVolume() const {
+float VideoPreviewWidget::getVolume() const
+{
     return audioOutput->volume();
 }
 
 void VideoPreviewWidget::playNextVideo()
 {
-    if(++currentVideoIndex < videoFiles.size()){
+    if(currentVideoIndex++ < videoFiles.size())
+    {
         mediaPlayer->setSource(QUrl::fromLocalFile(videoFiles[currentVideoIndex]));
         mediaPlayer->play();
     }
-    else{
+    else
+    {
         currentVideoIndex = 0;
     }
 }

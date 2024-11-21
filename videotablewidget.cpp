@@ -1,18 +1,16 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsScene>
 #include "videotablewidget.h"
-#include "Video.h"
+#include "VideoData.h"
 
 VideoTableWidget::VideoTableWidget(QWidget *parent)
     : QWidget{parent},
     tableWidget(new QTableWidget(this))
 {
-    tableWidget->setColumnCount(3);
-    tableWidget->setHorizontalHeaderLabels(QStringList() << "Title" << "Duration" << "Path");
-
+    tableWidget->setColumnCount(4);
+    tableWidget->setHorizontalHeaderLabels(QStringList() << "Title" << "Duration" << "Format" << "Path");
     tableWidget->setDragEnabled(true);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-
     tableWidget->setDragDropMode(QAbstractItemView::DragOnly);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -20,15 +18,16 @@ VideoTableWidget::VideoTableWidget(QWidget *parent)
     setLayout(layout);
 }
 
-void VideoTableWidget::updateTable(const QList<QString> &videoFiles)
+void VideoTableWidget::updateTable(const QList<QString> &mediaFiles)
 {
-    tableWidget->setRowCount(videoFiles.size());
+    tableWidget->setRowCount(mediaFiles.size());
 
-    for(int i = 0; i < videoFiles.size(); ++i) {
-        QFileInfo fileInfo(videoFiles[i]);
+    for(int i = 0; i < mediaFiles.size(); ++i) {
+        QFileInfo fileInfo(mediaFiles[i]);
         QString title = fileInfo.fileName();
-        QString durationText = getDurationText(videoFiles[i]);
-        QString filePath = videoFiles[i];
+        QString durationText = getDurationText(mediaFiles[i]);
+        QString format = getFileFormat(mediaFiles[i]);
+        QString filePath = mediaFiles[i];
 
         QTableWidgetItem *titleItem = new QTableWidgetItem(title);
         titleItem->setData(Qt::UserRole, filePath);
@@ -37,12 +36,13 @@ void VideoTableWidget::updateTable(const QList<QString> &videoFiles)
         QTableWidgetItem *durationItem = new QTableWidgetItem(durationText);
         tableWidget->setItem(i, 1, durationItem);
 
+        QTableWidgetItem *formatItem = new QTableWidgetItem(format);
+        tableWidget->setItem(i, 2, formatItem);
+
         QTableWidgetItem *pathItem = new QTableWidgetItem(filePath);
-        tableWidget->setItem(i, 2, pathItem);
+        tableWidget->setItem(i, 3, pathItem);
     }
 }
-
-
 
 QString VideoTableWidget::getDurationText(const QString &filePath)
 {
@@ -59,6 +59,11 @@ QString VideoTableWidget::getDurationText(const QString &filePath)
 
     int duration = mediaPlayer.duration();
     return QTime::fromMSecsSinceStartOfDay(duration).toString("mm:ss");
+}
+
+QString VideoTableWidget::getFileFormat(const QString &filePath) {
+    QFileInfo fileInfo(filePath);
+    return fileInfo.suffix().toUpper();
 }
 
 void VideoTableWidget::mousePressEvent(QMouseEvent *event) {
@@ -101,9 +106,8 @@ void VideoTableWidget::startDrag(const QPoint &pos) {
     drag->exec(Qt::CopyAction);
 }
 
-QByteArray VideoTableWidget::serializeRow(int row) const {
-
-
+QByteArray VideoTableWidget::serializeRow(int row) const
+{
     int currentRow = row;
 
     QTableWidgetItem *pathItem = tableWidget->item(currentRow, 3);

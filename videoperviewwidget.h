@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QAudioOutput>
 #include <QMimeData>
+#include "VideoData.h"
 
 
 class VideoPreviewWidget : public QWidget
@@ -20,10 +21,10 @@ public:
     void stop();
     void setPosition(qint64 position);
     void setVolume(float volume);
-    qint64 getDuration();
-    qint64 getPosition();
     void setVideoFiles(const QList<QString> &files);
     float getVolume() const;
+    qint64 getDuration();
+    qint64 getPosition();
 
 private:
     QMediaPlayer *mediaPlayer;
@@ -35,7 +36,6 @@ private:
 private slots:
     void playNextVideo();
 
-signals:
 };
 
 #endif // VIDEOPERVIEWWIDGET_H

@@ -90,11 +90,11 @@ void MainWindow::on_pauseButton_clicked()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select video files"), "", tr("Video Files (*.mp4 *.avi *.mov)"));
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select video files"), "",
+        tr("Video and Audio Files (*.mp4 *.avi *.mov *.mp3 *.wav *.flac)"));
     if (!fileNames.isEmpty()) {
         QList<QString> videoFiles = fileNames.toVector().toList();
         videoPreviewWidget->setVideoFiles(videoFiles);
-       // videoPreviewWidget->play();
         ui->pauseButton->setEnabled(false);
         positionUpdateTimer->start(1000);
 
@@ -143,6 +143,8 @@ void MainWindow::updateDurationLabel()
     }
 }
 
+
+
 void MainWindow::updateVideoTimeSlider() {
     if (videoPreviewWidget->getDuration() > 0) {
         qint64 currentPosition = videoPreviewWidget->getPosition();
@@ -152,7 +154,3 @@ void MainWindow::updateVideoTimeSlider() {
         ui->previewVideoTimeSlider->setValue(sliderPosition);
     }
 }
-
-
-
-

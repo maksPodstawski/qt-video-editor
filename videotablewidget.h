@@ -19,8 +19,10 @@ class VideoTableWidget : public QWidget
     Q_OBJECT
 public:
     explicit VideoTableWidget(QWidget *parent = nullptr);
-    void updateTable(const QList<QString> &videoFiles);
+
+    void updateTable(const QList<QString> &mediaFiles);
     static QString getDurationText(const QString &filePath);
+    static QString getFileFormat(const QString &filePath);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -28,11 +30,10 @@ protected:
 
 private:
     QTableWidget *tableWidget;
-    void startDrag(const QPoint &pos);
-    QByteArray serializeRow(int row) const;
     QPoint dragStartPosition;
 
-
+    QByteArray serializeRow(int row) const;
+    void startDrag(const QPoint &pos);
 };
 
 #endif // VIDEOTABLEWIDGET_H
