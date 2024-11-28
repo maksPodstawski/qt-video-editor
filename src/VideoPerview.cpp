@@ -1,4 +1,4 @@
-#include "videoperviewwidget.h"
+#include "../include/VideoPerview.h"
 
 VideoPreviewWidget::VideoPreviewWidget(QWidget *parent)
     : QWidget{parent},

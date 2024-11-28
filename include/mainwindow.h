@@ -1,16 +1,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "../ui/ui_mainwindow.h"
+#include "AudioData.h"
+#include "VideoData.h"
+#include "VideoPerview.h"
+#include "VideoTable.h"
+#include "TimeLine.h"
 #include <QMainWindow>
-#include <QFileDialog>
 #include <QVideoWidget>
 #include <QMediaPlayer>
 #include <QTimer>
-#include "videoperviewwidget.h"
-#include "videotablewidget.h"
-#include "timelinewidget.h"
-#include "AudioData.h"
-#include "VideoData.h"
+#include <QFileDialog>
+#include <QAudioOutput>
+#include <QDebug>
+#include <QSlider>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,7 +42,7 @@ private:
     Ui::MainWindow *ui;
 
     VideoPreviewWidget *videoPreviewWidget;
-    VideoTableWidget *videoTable;
+    VideoTable *videoTable;
     TimelineWidget *timeLine;
     QTimer *positionUpdateTimer;
 

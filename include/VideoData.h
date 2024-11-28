@@ -1,9 +1,7 @@
 #ifndef VIDEO_EDITOR_VIDEO_H
 #define VIDEO_EDITOR_VIDEO_H
 
-
 #include <QString>
-
 
 class VideoData {
 public:
@@ -13,6 +11,11 @@ public:
     QString getDuration() const;
     QString getExtension() const;
     QString getFilePath() const;
+
+    void setFilePath(const QString &filePath);
+    void setTitle(const QString &title);
+    void setDuration(const QString &duration);
+    void setExtension(const QString &extension);
 
 private:
     QString title;

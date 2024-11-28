@@ -12,6 +12,11 @@ public:
     QString getExtension() const;
     QString getFilePath() const;
 
+    void setFilePath(const QString &filePath);
+    void setTitle(const QString &title);
+    void setDuration(const QString &duration);
+    void setExtension(const QString &extension);
+
 private:
     QString title;
     QString duration;

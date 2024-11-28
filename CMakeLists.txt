@@ -16,19 +16,19 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 add_executable(video_editor
-        main.cpp
-        MainWindow.cpp
-        MainWindow.h
-        videoperviewwidget.cpp
-        videoperviewwidget.h
-        videotablewidget.cpp
-        videotablewidget.h
-        timelinewidget.cpp
-        timelinewidget.h
-        VideoData.cpp
-        VideoData.h
-        AudioData.cpp
-        AudioData.h
+        src/main.cpp
+        src/mainwindow.cpp
+        include/mainwindow.h
+        src/VideoPerview.cpp
+        include/VideoPerview.h
+        src/VideoTable.cpp
+        include/VideoTable.h
+        src/TimeLine.cpp
+        include/TimeLine.h
+        src/VideoData.cpp
+        include/VideoData.h
+        src/AudioData.cpp
+        include/AudioData.h
 )
 
 target_link_libraries(video_editor

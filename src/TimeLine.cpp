@@ -1,10 +1,10 @@
-#include "timelinewidget.h"
-#include "videotablewidget.h"
+#include "../include/TimeLine.h"
+#include "../include/VideoPerview.h"
 
 TimelineWidget::TimelineWidget(QWidget *parent)
         : QGraphicsView(parent),
-          scene(new QGraphicsScene(this)),
-          draggedItem(nullptr)
+        scene(new QGraphicsScene(this)),
+        draggedItem(nullptr)
 {
     setScene(scene);
     setAcceptDrops(true);
@@ -32,6 +32,7 @@ void TimelineWidget::initializeGrid()
 {
     QPen gridPen(QColor(60, 65, 75));
     QRectF sceneRect = scene->sceneRect();
+
     for (int y = sceneRect.top(); y < sceneRect.bottom(); y += LINE_HEIGHT) {
         scene->addLine(sceneRect.left(), y, sceneRect.right(), y, gridPen);
     }
@@ -41,8 +42,6 @@ void TimelineWidget::initializeGrid()
 void TimelineWidget::dropEvent(QDropEvent *event)
 {
     qDebug() << "Drop event";
-    qDebug() << "Mime formats:" << event->mimeData()->formats();
-
     if (!event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         qDebug() << "Invalid mime format";
         event->ignore();
@@ -52,25 +51,26 @@ void TimelineWidget::dropEvent(QDropEvent *event)
     QByteArray itemData = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
     QDataStream stream(itemData);
 
-    QString filePath, duration;
+    QString filePath, duration, title, format;
     while (!stream.atEnd()) {
         int row, col;
         QMap<int, QVariant> valueMap;
         stream >> row >> col >> valueMap;
 
-        qDebug() << "Reading data for column:" << col;
-        qDebug() << "ValueMap contents:" << valueMap;
-
         if (col == 0) {
             filePath = valueMap.value(Qt::UserRole).toString();
-        } else if (col == 1) {
+        }
+        else if (col == 1) {
             duration = valueMap.value(Qt::DisplayRole).toString();
         }
+        else if (col == 2) {
+            format = valueMap.value(Qt::DisplayRole).toString();
+        }
+        else if (col == 3) {
+            QFileInfo fileInfo(valueMap.value(Qt::DisplayRole).toString());
+            title = fileInfo.baseName();
+        }
     }
-
-    qDebug() << "Extracted data:";
-    qDebug() << "FilePath:" << filePath;
-    qDebug() << "Duration:" << duration;
 
     if (filePath.isEmpty()) {
         qDebug() << "File path is empty";
@@ -78,26 +78,29 @@ void TimelineWidget::dropEvent(QDropEvent *event)
         return;
     }
 
-    if (duration.isEmpty()) {
-        qDebug() << "Duration is empty, using default value";
-        duration = "00:00";
-    }
-
     QPointF scenePos = mapToScene(event->position().toPoint());
+    VideoData video(title, duration, filePath, format);
+    addVideoItem(video, scenePos);
+    filmsList.append(video);
 
-    addVideoItem(filePath, duration, scenePos);
-
-    filmsList.append(filePath);
-    qDebug() << "Films list: " << filmsList;
+    qDebug() << "Added video:";
+    qDebug() << "Title:" << video.getTitle();
+    qDebug() << "FilePath:" << video.getFilePath();
+    qDebug() << "Duration:" << video.getDuration();
+    qDebug() << "Format:" << video.getExtension();
 
     updateFilmsList();
     event->accept();
 }
 
-void TimelineWidget::addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos)
+void TimelineWidget::addVideoItem(const VideoData &video, const QPointF &pos)
 {
-    int totalSeconds = QTime::fromString(duration, "mm:ss").msecsSinceStartOfDay() / 1000;
+    createVideoItem(video, pos);
+}
 
+void TimelineWidget::createVideoItem(const VideoData &video, const QPointF &pos)
+{
+    int totalSeconds = QTime::fromString(video.getDuration(), "mm:ss").msecsSinceStartOfDay() / 1000;
     const int rectWidth = 15 * totalSeconds;
     const int rectHeight = 30;
 
@@ -106,12 +109,18 @@ void TimelineWidget::addVideoItem(const QString &filePath, const QString &durati
 
     qreal snappedY = snapToNearestLine(pos.y());
     videoItem->setPos(pos.x(), snappedY);
-    videoItem->setBrush(QBrush(Qt::lightGray));
-    videoItem->setData(Qt::UserRole, filePath);
+    videoItem->setBrush(QBrush(generateRandomColor()));
+    videoItem->setData(Qt::UserRole, video.getFilePath());
 
     videoItem->setFlag(QGraphicsItem::ItemIsMovable);
 
-    QFileInfo fileInfo(filePath);
+    createTextItemForVideo(video, videoItem);
+    scene->addItem(videoItem);
+}
+
+void TimelineWidget::createTextItemForVideo(const VideoData &video, QGraphicsRectItem *videoItem)
+{
+    QFileInfo fileInfo(video.getFilePath());
     auto *textItem = new QGraphicsTextItem(videoItem);
 
     QFont font = textItem->font();
@@ -119,31 +128,38 @@ void TimelineWidget::addVideoItem(const QString &filePath, const QString &durati
     textItem->setFont(font);
     textItem->setDefaultTextColor(Qt::black);
 
-    QString fileName = fileInfo.fileName();
+    QString fileName = video.getTitle();
     QFontMetrics fm(font);
-    int maxWidth = rectWidth - 10;
+    int maxWidth = videoItem->rect().width() - 10;
     QString elidedText = fm.elidedText(fileName, Qt::ElideMiddle, maxWidth);
 
     textItem->setPlainText(elidedText);
 
     QRectF textRect = textItem->boundingRect();
-    qreal textX = (rectWidth - textRect.width()) / 2;
-    qreal textY = (rectHeight - textRect.height()) / 2;
+    qreal textX = (videoItem->rect().width() - textRect.width()) / 2;
+    qreal textY = (videoItem->rect().height() - textRect.height()) / 2;
     textItem->setPos(textX, textY);
-
-    scene->addItem(videoItem);
-
-    qDebug() << "Added video item for file:" << filePath
-             << "at position:" << pos;
 }
 
+QColor TimelineWidget::generateRandomColor() {
+    return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
+}
+
+void TimelineWidget::updatePositionForDraggedItem(const QPointF &scenePos)
+{
+    if (draggedItem) {
+        qreal snappedY = snapToNearestLine(scenePos.y() - dragOffset.y());
+        qreal newX = scenePos.x() - dragOffset.x();
+        draggedItem->setPos(newX, snappedY);
+    }
+}
 
 void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << event->mimeData()->formats();
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         event->accept();
-    } else {
+    }
+    else {
         event->ignore();
     }
 }
@@ -180,12 +196,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (draggedItem && event->buttons() & Qt::LeftButton) {
         QPointF scenePos = mapToScene(event->pos());
-
-        qreal snappedY = snapToNearestLine(scenePos.y() - dragOffset.y());
-        qreal newX = scenePos.x() - dragOffset.x();
-
-        draggedItem->setPos(newX, snappedY);
-        qDebug() << "Moved item to:" << draggedItem->pos();
+        updatePositionForDraggedItem(scenePos);
         event->accept();
     }
     else {
@@ -212,7 +223,6 @@ void TimelineWidget::mousePressEvent(QMouseEvent *event)
 void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (draggedItem) {
-
         QPointF scenePos = draggedItem->pos();
         qreal snappedY = snapToNearestLine(scenePos.y());
 
@@ -227,7 +237,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void TimelineWidget::updateFilmsList()
 {
-    QMap<qreal, QString> positionToFileMap;
+    QMap<qreal, VideoData> positionToVideoMap;
 
     for(QGraphicsItem *item : scene->items())
     {
@@ -236,11 +246,28 @@ void TimelineWidget::updateFilmsList()
             QString filePath = item->data(Qt::UserRole).toString();
             if(!filePath.isEmpty())
             {
-                positionToFileMap.insert(item->pos().x(), filePath);
+                for (const VideoData &video : filmsList) {
+                    if (video.getFilePath() == filePath) {
+                        positionToVideoMap.insert(item->pos().x(), video);
+                        break;
+                    }
+                }
             }
         }
     }
 
-    filmsList = positionToFileMap.values();
-    qDebug() << "Updated films list (sorted by x):" << filmsList;
+    filmsList.clear();
+
+    for(const VideoData &video : positionToVideoMap.values()) {
+        filmsList.append(video);
+    }
+
+    QList<QString> titleList;
+    for (const VideoData &video : filmsList) {
+        titleList.append(video.getTitle());
+    }
+
+    qDebug() << "Updated films list (sorted by x):" << titleList;
 }
+
+

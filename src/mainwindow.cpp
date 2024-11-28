@@ -1,18 +1,12 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include <QFileDialog>
-#include <QVideoWidget>
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QDebug>
-#include <QSlider>
+#include "../include/mainwindow.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , videoPreviewWidget(new VideoPreviewWidget(this))
-    , videoTable(new VideoTableWidget(this))
+    , videoTable(new VideoTable(this))
     , timeLine(new TimelineWidget(this))
 {
     ui->setupUi(this);

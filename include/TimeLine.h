@@ -1,12 +1,14 @@
 #ifndef TIMELINEWIDGET_H
 #define TIMELINEWIDGET_H
 
+#include "VideoData.h"
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QDragEnterEvent>
 #include <QGraphicsTextItem>
 #include <QFileInfo>
 #include <QApplication>
+#include <QColor>
 
 
 class TimelineWidget : public QGraphicsView
@@ -26,17 +28,23 @@ protected:
 
 private:
     QGraphicsScene *scene;
-    QList<QString> filmsList;
+    QList<VideoData> filmsList;
     QGraphicsItem *draggedItem;
     QPointF dragOffset;
     qreal sceneStartY;
     const int LINE_HEIGHT = 30;
+    double timelineScale = 1.0;
     
-    void addVideoItem(const QString &filePath, const QString &duration, const QPointF &pos);
+    void addVideoItem(const VideoData &video, const QPointF &pos);
     void initializeScene();
     void initializeGrid();
     void updateFilmsList();
+    void createTextItemForVideo(const VideoData &video, QGraphicsRectItem *videoItem);
+    void createVideoItem(const VideoData &video, const QPointF &pos);
+    void updatePositionForDraggedItem(const QPointF &scenePos);
     int snapToNearestLine(qreal yPos);
+    QColor generateRandomColor();
+
 };
 
 #endif // TIMELINEWIDGET_H

@@ -1,13 +1,13 @@
 #ifndef VIDEOPERVIEWWIDGET_H
 #define VIDEOPERVIEWWIDGET_H
 
+#include "VideoData.h"
 #include <QWidget>
 #include <QMediaPlayer>
 #include <QVideoWidget>
 #include <QVBoxLayout>
 #include <QAudioOutput>
 #include <QMimeData>
-#include "VideoData.h"
 
 
 class VideoPreviewWidget : public QWidget
