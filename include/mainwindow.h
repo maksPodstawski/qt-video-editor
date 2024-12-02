@@ -15,6 +15,7 @@
 #include <QAudioOutput>
 #include <QDebug>
 #include <QSlider>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,12 +39,15 @@ private slots:
     void on_playButton_clicked();
     void on_pauseButton_clicked();
 
+    void on_actionExport_triggered();
+
+
 private:
     Ui::MainWindow *ui;
 
-    VideoPreviewWidget *videoPreviewWidget;
+    VideoPreview *videoPreviewWidget;
     VideoTable *videoTable;
-    TimelineWidget *timeLine;
+    TimeLine *timeLine;
     QTimer *positionUpdateTimer;
 
     bool isSliderBeingMoved = false;

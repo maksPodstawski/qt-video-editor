@@ -1,7 +1,7 @@
 #include "../include/TimeLine.h"
 #include "../include/VideoPerview.h"
 
-TimelineWidget::TimelineWidget(QWidget *parent)
+TimeLine::TimeLine(QWidget *parent)
         : QGraphicsView(parent),
         scene(new QGraphicsScene(this)),
         draggedItem(nullptr)
@@ -20,7 +20,7 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
 }
 
-void TimelineWidget::initializeScene()
+void TimeLine::initializeScene()
 {
     QGraphicsRectItem *timelinePath = new QGraphicsRectItem(scene->sceneRect());
     timelinePath->setBrush(QBrush(QColor(50, 55, 65)));
@@ -28,7 +28,7 @@ void TimelineWidget::initializeScene()
     scene->addItem(timelinePath);
 }
 
-void TimelineWidget::initializeGrid()
+void TimeLine::initializeGrid()
 {
     QPen gridPen(QColor(60, 65, 75));
     QRectF sceneRect = scene->sceneRect();
@@ -39,7 +39,7 @@ void TimelineWidget::initializeGrid()
 }
 
 
-void TimelineWidget::dropEvent(QDropEvent *event)
+void TimeLine::dropEvent(QDropEvent *event)
 {
     qDebug() << "Drop event";
     if (!event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
@@ -93,12 +93,12 @@ void TimelineWidget::dropEvent(QDropEvent *event)
     event->accept();
 }
 
-void TimelineWidget::addVideoItem(const VideoData &video, const QPointF &pos)
+void TimeLine::addVideoItem(const VideoData &video, const QPointF &pos)
 {
     createVideoItem(video, pos);
 }
 
-void TimelineWidget::createVideoItem(const VideoData &video, const QPointF &pos)
+void TimeLine::createVideoItem(const VideoData &video, const QPointF &pos)
 {
     int totalSeconds = QTime::fromString(video.getDuration(), "mm:ss").msecsSinceStartOfDay() / 1000;
     const int rectWidth = 15 * totalSeconds;
@@ -118,7 +118,7 @@ void TimelineWidget::createVideoItem(const VideoData &video, const QPointF &pos)
     scene->addItem(videoItem);
 }
 
-void TimelineWidget::createTextItemForVideo(const VideoData &video, QGraphicsRectItem *videoItem)
+void TimeLine::createTextItemForVideo(const VideoData &video, QGraphicsRectItem *videoItem)
 {
     QFileInfo fileInfo(video.getFilePath());
     auto *textItem = new QGraphicsTextItem(videoItem);
@@ -141,11 +141,11 @@ void TimelineWidget::createTextItemForVideo(const VideoData &video, QGraphicsRec
     textItem->setPos(textX, textY);
 }
 
-QColor TimelineWidget::generateRandomColor() {
+QColor TimeLine::generateRandomColor() {
     return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
 }
 
-void TimelineWidget::updatePositionForDraggedItem(const QPointF &scenePos)
+void TimeLine::updatePositionForDraggedItem(const QPointF &scenePos)
 {
     if (draggedItem) {
         qreal snappedY = snapToNearestLine(scenePos.y() - dragOffset.y());
@@ -154,7 +154,7 @@ void TimelineWidget::updatePositionForDraggedItem(const QPointF &scenePos)
     }
 }
 
-void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
+void TimeLine::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         event->accept();
@@ -164,12 +164,12 @@ void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void TimelineWidget::dragMoveEvent(QDragMoveEvent *event)
+void TimeLine::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
 }
 
-void TimelineWidget::wheelEvent(QWheelEvent *event)
+void TimeLine::wheelEvent(QWheelEvent *event)
 {
     if(event->modifiers() & Qt::ControlModifier) {
         if(event->angleDelta().y() > 0) {
@@ -185,14 +185,14 @@ void TimelineWidget::wheelEvent(QWheelEvent *event)
     }
 }
 
-int TimelineWidget::snapToNearestLine(qreal yPos)
+int TimeLine::snapToNearestLine(qreal yPos)
 {
     qreal snapped = sceneStartY + qRound((yPos - sceneStartY) / LINE_HEIGHT) * LINE_HEIGHT;
     qDebug() << "snapToNearestLine: yPos =" << yPos << ", snappedY =" << snapped;
     return snapped;
 }
 
-void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
+void TimeLine::mouseMoveEvent(QMouseEvent *event)
 {
     if (draggedItem && event->buttons() & Qt::LeftButton) {
         QPointF scenePos = mapToScene(event->pos());
@@ -204,7 +204,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void TimelineWidget::mousePressEvent(QMouseEvent *event)
+void TimeLine::mousePressEvent(QMouseEvent *event)
 {
     QPointF scenePos = mapToScene(event->pos());
     QGraphicsItem *item = scene->itemAt(scenePos, QTransform());
@@ -220,7 +220,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent *event)
     QGraphicsView::mousePressEvent(event);
 }
 
-void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
+void TimeLine::mouseReleaseEvent(QMouseEvent *event)
 {
     if (draggedItem) {
         QPointF scenePos = draggedItem->pos();
@@ -235,7 +235,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
     QGraphicsView::mouseReleaseEvent(event);
 }
 
-void TimelineWidget::updateFilmsList()
+void TimeLine::updateFilmsList()
 {
     QMap<qreal, VideoData> positionToVideoMap;
 

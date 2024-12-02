@@ -1,8 +1,7 @@
-#ifndef VIDEOTABLEWIDGET_H
-#define VIDEOTABLEWIDGET_H
+#ifndef VIDEOTABLE_H
+#define VIDEOTABLE_H
 
 #include "VideoData.h"
-#include "VideoTable.h"
 #include <QWidget>
 #include <QTableWidget>
 #include <QVBoxLayout>
@@ -43,4 +42,4 @@ private:
     void setUpTableWidget();
 };
 
-#endif // VIDEOTABLEWIDGET_H
+#endif // VIDEOTABLE_H

@@ -1,5 +1,5 @@
-#ifndef VIDEOPERVIEWWIDGET_H
-#define VIDEOPERVIEWWIDGET_H
+#ifndef VIDEOPERVIEW_H
+#define VIDEOPERVIEW_H
 
 #include "VideoData.h"
 #include <QWidget>
@@ -10,11 +10,11 @@
 #include <QMimeData>
 
 
-class VideoPreviewWidget : public QWidget
+class VideoPreview : public QWidget
 {
     Q_OBJECT
 public:
-    explicit VideoPreviewWidget(QWidget *parent = nullptr);
+    explicit VideoPreview(QWidget *parent = nullptr);
 
     void play();
     void pause();
@@ -38,4 +38,4 @@ private slots:
 
 };
 
-#endif // VIDEOPERVIEWWIDGET_H
+#endif // VIDEOPERVIEW_H

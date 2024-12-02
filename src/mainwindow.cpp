@@ -5,9 +5,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , videoPreviewWidget(new VideoPreviewWidget(this))
+    , videoPreviewWidget(new VideoPreview(this))
     , videoTable(new VideoTable(this))
-    , timeLine(new TimelineWidget(this))
+    , timeLine(new TimeLine(this))
 {
     ui->setupUi(this);
 
@@ -58,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(positionUpdateTimer, &QTimer::timeout, this, [this]() {
         updateDurationLabel();
     });
+
+
 }
 
 MainWindow::~MainWindow()
@@ -148,3 +150,10 @@ void MainWindow::updateVideoTimeSlider() {
         ui->previewVideoTimeSlider->setValue(sliderPosition);
     }
 }
+
+void MainWindow::on_actionExport_triggered()
+{
+    QFileDialog::getSaveFileName(this, "Save File", "", "Text Files (*.txt);;All Files (*)");
+}
+
+

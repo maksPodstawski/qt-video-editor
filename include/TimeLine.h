@@ -1,5 +1,5 @@
-#ifndef TIMELINEWIDGET_H
-#define TIMELINEWIDGET_H
+#ifndef TIMELINE_H
+#define TIMELINE_H
 
 #include "VideoData.h"
 #include <QGraphicsView>
@@ -11,11 +11,11 @@
 #include <QColor>
 
 
-class TimelineWidget : public QGraphicsView
+class TimeLine : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit TimelineWidget(QWidget *parent = nullptr);
+    explicit TimeLine(QWidget *parent = nullptr);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -47,4 +47,4 @@ private:
 
 };
 
-#endif // TIMELINEWIDGET_H
+#endif // TIMELINE_H
