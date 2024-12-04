@@ -41,7 +41,7 @@ public:
     QLabel *timeLabel;
     QSlider *previewVideoTimeSlider;
     QGroupBox *groupBoxVideosTable;
-    QGraphicsView *graphicsViewTimeLine;
+    QScrollArea *timeLineScrollArea;
     QMenuBar *menubar;
     QMenu *menuFile;
     QStatusBar *statusbar;
@@ -91,9 +91,9 @@ public:
         groupBoxVideosTable = new QGroupBox(centralwidget);
         groupBoxVideosTable->setObjectName("groupBoxVideosTable");
         groupBoxVideosTable->setGeometry(QRect(30, 30, 451, 371));
-        graphicsViewTimeLine = new QGraphicsView(centralwidget);
-        graphicsViewTimeLine->setObjectName("graphicsViewTimeLine");
-        graphicsViewTimeLine->setGeometry(QRect(30, 430, 1171, 192));
+        timeLineScrollArea = new QScrollArea(centralwidget);
+        timeLineScrollArea->setObjectName("timeLineScrollArea");
+        timeLineScrollArea->setGeometry(QRect(30, 430, 1171, 192));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");

@@ -16,6 +16,8 @@
 #include <QDebug>
 #include <QSlider>
 #include <QMessageBox>
+#include <QStyleFactory>
+#include <QScrollArea>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,7 +40,6 @@ private slots:
     void on_volumeChangeSlider_valueChanged(int value);
     void on_playButton_clicked();
     void on_pauseButton_clicked();
-
     void on_actionExport_triggered();
 
 

@@ -1,5 +1,5 @@
 #include "../include/mainwindow.h"
-
+#include "../include/VideoTable.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,13 +20,15 @@ MainWindow::MainWindow(QWidget *parent)
     videoTableLayout->addWidget(videoTable);
     ui->groupBoxVideosTable->setLayout(videoTableLayout);
 
-
-    QVBoxLayout *videoTimeLineLayout = new QVBoxLayout(ui->graphicsViewTimeLine);
-    videoTimeLineLayout->addWidget(timeLine);
-    ui->graphicsViewTimeLine->setLayout(videoTimeLineLayout);
+    
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidget(timeLine);
+    scrollArea->setWidgetResizable(true);
+    ui->timeLineScrollArea->setLayout(new QVBoxLayout);
+    ui->timeLineScrollArea->layout()->addWidget(scrollArea);
 
     ui->previewVideoTimeSlider->setRange(0, 100);
-
+    ui->previewVideoTimeSlider->setValue(0);
     positionUpdateTimer = new QTimer(this);
 
 

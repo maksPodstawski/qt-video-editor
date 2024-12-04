@@ -23,7 +23,6 @@ class VideoTable : public QWidget
 public:
     explicit VideoTable(QWidget *parent = nullptr);
 
-
     void updateTable(const QList<QString> &mediaFiles);
 
     static QString getDurationText(const QString &filePath);

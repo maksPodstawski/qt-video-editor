@@ -9,9 +9,13 @@
 #include <QFileInfo>
 #include <QApplication>
 #include <QColor>
+#include <QLabel>
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QWidget>
 
 
-class TimeLine : public QGraphicsView
+class TimeLine : public QWidget
 {
     Q_OBJECT
 public:
@@ -25,26 +29,22 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
-    QGraphicsScene *scene;
-    QList<VideoData> filmsList;
-    QGraphicsItem *draggedItem;
-    QPointF dragOffset;
-    qreal sceneStartY;
-    const int LINE_HEIGHT = 30;
-    double timelineScale = 1.0;
-    
-    void addVideoItem(const VideoData &video, const QPointF &pos);
-    void initializeScene();
-    void initializeGrid();
-    void updateFilmsList();
-    void createTextItemForVideo(const VideoData &video, QGraphicsRectItem *videoItem);
-    void createVideoItem(const VideoData &video, const QPointF &pos);
-    void updatePositionForDraggedItem(const QPointF &scenePos);
-    int snapToNearestLine(qreal yPos);
-    QColor generateRandomColor();
 
+    QList<int> lines;
+    QList<VideoData> videoList;
+    double scaleFactor = 1.0;
+    VideoData *draggingVideo;
+    QPoint dragStartPos;
+
+    const int LINE_HEIGHT = 30;
+
+    int findNearestLine(int y);
+    void drawLines(QPainter &painter);
+    void drawTextOnVideos(QPainter &painter);
+    void updateVideoPositions();
 };
 
 #endif // TIMELINE_H
