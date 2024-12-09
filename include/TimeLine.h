@@ -42,8 +42,13 @@ private:
     const int LINE_HEIGHT = 30;
 
     int findNearestLine(int y);
+    void drawVideos(QPainter &painter);
     void drawLines(QPainter &painter);
     void drawTextOnVideos(QPainter &painter);
+    VideoData extractVideoData(const QMimeData *mimeData);
+    int calculateVideoWidth(const QString &duration);
+    void moveDraggingVideo(const QPoint &pos);
+    void scaleVideos(double factor);
     void updateVideoPositions();
 };
 

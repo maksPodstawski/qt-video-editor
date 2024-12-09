@@ -7,29 +7,31 @@ TimeLine::TimeLine(QWidget *parent)
 {
     setAcceptDrops(true);
     lines = {50, 80, 110, 140, 170};
-    draggingVideo = nullptr;
 }
 
 void TimeLine::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     drawLines(painter);
+    drawVideos(painter);
+    drawTextOnVideos(painter);
+}
 
+void TimeLine::drawVideos(QPainter &painter)
+{
     for (const VideoData &video : videoList)
     {
         QRect videoRect = video.getRect();
         painter.setBrush(QBrush(video.getColor()));
         painter.drawRect(videoRect);
     }
-
-    drawTextOnVideos(painter);
 }
 
 void TimeLine::drawTextOnVideos(QPainter &painter)
 {
     painter.setPen(QPen(Qt::black));
-
-    for (const VideoData &video : videoList) {
+    for (const VideoData &video : videoList)
+    {
         QRect videoRect = video.getRect();
         painter.drawText(videoRect, Qt::AlignCenter, video.getTitle());
     }
@@ -38,8 +40,10 @@ void TimeLine::drawTextOnVideos(QPainter &painter)
 void TimeLine::drawLines(QPainter &painter)
 {
     painter.setPen(QPen(Qt::black, 2));
-    for(int line : lines)
+    for (int line : lines)
+    {
         painter.drawLine(0, line, width(), line);
+    }
 }
 
 void TimeLine::dropEvent(QDropEvent *event)
@@ -51,27 +55,9 @@ void TimeLine::dropEvent(QDropEvent *event)
         return;
     }
 
-    QByteArray itemData = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
-    QDataStream stream(itemData);
-    QString filePath, duration, title, format;
-
-    while (!stream.atEnd())
+    VideoData video = extractVideoData(event->mimeData());
+    if (video.getFilePath().isEmpty())
     {
-        int row, col;
-        QMap<int, QVariant> valueMap;
-        stream >> row >> col >> valueMap;
-
-        if (col == 0) filePath = valueMap.value(Qt::UserRole).toString();
-        else if (col == 1) duration = valueMap.value(Qt::DisplayRole).toString();
-        else if (col == 2) format = valueMap.value(Qt::DisplayRole).toString();
-        else if (col == 3) {
-            QFileInfo fileInfo(valueMap.value(Qt::DisplayRole).toString());
-            title = fileInfo.baseName();
-        }
-    }
-
-    if (filePath.isEmpty()) {
-        qDebug() << "File path is empty";
         event->ignore();
         return;
     }
@@ -81,8 +67,8 @@ void TimeLine::dropEvent(QDropEvent *event)
     int nearestLine = findNearestLine(scenePos.y());
     qDebug() << "nearestLine:" << nearestLine;
 
-    QRect rect(scenePos.x() + 20, nearestLine, 100, LINE_HEIGHT);
-    VideoData video(title, duration, filePath, format, rect);
+    QRect rect(scenePos.x() + 20, nearestLine, calculateVideoWidth(video.getDuration()), LINE_HEIGHT);
+    video.setRect(rect);
 
     video.getRect().moveTopLeft(QPoint(100, nearestLine));
     videoList.append(video);
@@ -97,12 +83,41 @@ void TimeLine::dropEvent(QDropEvent *event)
     event->accept();
 }
 
+VideoData TimeLine::extractVideoData(const QMimeData *mimeData)
+{
+    QByteArray itemData = mimeData->data("application/x-qabstractitemmodeldatalist");
+    QDataStream stream(itemData);
+    QString filePath, duration, title, format;
+
+    while (!stream.atEnd())
+    {
+        int row, col;
+        QMap<int, QVariant> valueMap;
+        stream >> row >> col >> valueMap;
+
+        if (col == 0) filePath = valueMap.value(Qt::UserRole).toString();
+        else if (col == 1) duration = valueMap.value(Qt::DisplayRole).toString();
+        else if (col == 2) format = valueMap.value(Qt::DisplayRole).toString();
+        else if (col == 3) title = QFileInfo(valueMap.value(Qt::DisplayRole).toString()).baseName();
+    }
+
+    return VideoData(title, duration, filePath, format, QRect());
+}
+
+int TimeLine::calculateVideoWidth(const QString &duration)
+{
+    int totalSeconds = QTime::fromString(duration, "mm:ss").msecsSinceStartOfDay() / 1000;
+    return totalSeconds;
+}
+
 void TimeLine::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
+    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+    {
         event->accept();
     }
-    else {
+    else
+    {
         event->ignore();
     }
 }
@@ -131,25 +146,22 @@ void TimeLine::mouseMoveEvent(QMouseEvent *event)
 {
     if (draggingVideo)
     {
-        QRect rect = draggingVideo->getRect();
-        QPoint newPosition = event->pos() - dragStartPos;
-
-        int minX = 0;
-        int maxX = width() - rect.width();
-        int adjustedX = qBound(minX, newPosition.x(), maxX);
-
-        int nearestLine = findNearestLine(newPosition.y());
-        int minY = lines[0];
-        int maxY = lines[lines.size() - 1] - rect.height();
-        int adjustedY = qBound(minY, nearestLine, maxY);
-
-
-        rect.moveTopLeft(QPoint(adjustedX, adjustedY));
-        draggingVideo->setRect(rect);
-        qDebug() << "Dragging " << draggingVideo->getTitle() << " to position: " << rect;
-
+        moveDraggingVideo(event->pos());
         update();
     }
+}
+
+void TimeLine::moveDraggingVideo(const QPoint &pos)
+{
+    QRect rect = draggingVideo->getRect();
+    QPoint newPosition = pos - dragStartPos;
+
+    int adjustedX = qBound(0, newPosition.x(), width() - rect.width());
+    int adjustedY = qBound(lines[0], findNearestLine(newPosition.y()), lines.last() - rect.height());
+
+    rect.moveTopLeft(QPoint(adjustedX, adjustedY));
+    draggingVideo->setRect(rect);
+    qDebug() << "Dragging " << draggingVideo->getTitle() << " to position: " << rect;
 }
 
 void TimeLine::mouseReleaseEvent(QMouseEvent *event)
@@ -157,42 +169,39 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event)
     if (draggingVideo)
     {
         QRect rect = draggingVideo->getRect();
-        int nearestLine = findNearestLine(rect.topLeft().y());
 
-        rect.moveTopLeft(QPoint(rect.topLeft().x(), nearestLine));
+        rect.moveTopLeft(QPoint(rect.topLeft().x(), findNearestLine(rect.topLeft().y())));
         draggingVideo->setRect(rect);
 
         updateVideoPositions();
-
         draggingVideo = nullptr;
         qDebug() << "Film released at position: " << rect;
-
         update();
     }
 }
 
 void TimeLine::wheelEvent(QWheelEvent *event)
 {
-    constexpr int MIN_WIDTH = 10;
 
     if (event->modifiers() & Qt::ControlModifier)
     {
-        if (event->angleDelta().y() > 0) scaleFactor = 1.1;
-        else scaleFactor = 0.9;
-
-        for (auto &video : videoList)
-        {
-            int newWidth = static_cast<int>(video.getRect().width() * scaleFactor);
-
-            if (newWidth >= MIN_WIDTH) video.getRect().setWidth(newWidth);
-            else video.getRect().setWidth(MIN_WIDTH);
-        }
-
+        scaleVideos(event->angleDelta().y() > 0 ? 1.1 : 0.9);
         event->accept();
         update();
     }
-    else {
+    else
+    {
         QWidget::wheelEvent(event);
+    }
+}
+
+void TimeLine::scaleVideos(double factor)
+{
+    constexpr int MIN_WIDTH = 10;
+    for (auto &video : videoList)
+    {
+        int newWidth = static_cast<int>(video.getRect().width() * factor);
+        video.getRect().setWidth(qMax(newWidth, MIN_WIDTH));
     }
 }
 
@@ -201,13 +210,13 @@ int TimeLine::findNearestLine(int y)
     int nearestLine = lines[0];
     int minDistance = qAbs(y - lines[0]);
 
-    for (int i = 1; i < lines.size(); ++i)
+    for (int line : lines)
     {
-        int distance = qAbs(y - lines[i]);
-
-        if (distance < minDistance) {
+        int distance = qAbs(y - line);
+        if (distance < minDistance)
+        {
             minDistance = distance;
-            nearestLine = lines[i];
+            nearestLine = line;
         }
     }
 
