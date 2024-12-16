@@ -1,5 +1,5 @@
 #include "../include/mainwindow.h"
-
+#include "../include/VideoCombiner.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     , videoPreviewWidget(new VideoPreview(this))
     , videoTable(new VideoTable(this))
     , timeLine(new TimeLine(this))
+    , editor(new Editor)
 {
     ui->setupUi(this);
 
@@ -153,7 +154,25 @@ void MainWindow::updateVideoTimeSlider() {
 
 void MainWindow::on_actionExport_triggered()
 {
-    QFileDialog::getSaveFileName(this, "Save File", "", "Text Files (*.txt);;All Files (*)");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save video file"), "",
+                                                    tr("Video Files (*.mp4)"));
+    if (!fileName.isEmpty()) {
+        QList<QString> inputFiles;
+        for (const VideoData &video : timeLine->getFilmsList()) {
+            qDebug() << video.getFilePath();
+            inputFiles.append(video.getFilePath());
+        }
+
+        VideoCombiner *combiner = new VideoCombiner(editor, inputFiles, fileName, this);
+        connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {
+            if (success) {
+                QMessageBox::information(this, "Success", "Video exported successfully");
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to export video");
+            }
+        });
+        combiner->start();
+    }
 }
 
 

@@ -7,6 +7,7 @@
 #include "VideoPerview.h"
 #include "VideoTable.h"
 #include "TimeLine.h"
+#include "Editor.h"
 #include <QMainWindow>
 #include <QVideoWidget>
 #include <QMediaPlayer>
@@ -49,6 +50,7 @@ private:
     VideoTable *videoTable;
     TimeLine *timeLine;
     QTimer *positionUpdateTimer;
+    Editor *editor;
 
     bool isSliderBeingMoved = false;
     float previousVolume;

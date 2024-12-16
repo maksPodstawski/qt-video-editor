@@ -29,6 +29,10 @@ add_executable(video_editor
         include/VideoData.h
         src/AudioData.cpp
         include/AudioData.h
+        src/Editor.cpp
+        include/Editor.h
+        src/VideoCombiner.cpp
+        include/VideoCombiner.h
 )
 
 target_link_libraries(video_editor

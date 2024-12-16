@@ -16,6 +16,7 @@ class TimeLine : public QGraphicsView
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
+    QList<VideoData> getFilmsList() const;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

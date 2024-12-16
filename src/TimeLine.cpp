@@ -270,4 +270,8 @@ void TimeLine::updateFilmsList()
     qDebug() << "Updated films list (sorted by x):" << titleList;
 }
 
+QList<VideoData> TimeLine::getFilmsList() const {
+    return this->filmsList;
+}
+
 
