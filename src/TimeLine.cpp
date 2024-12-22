@@ -3,7 +3,8 @@
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
-        draggingVideo(nullptr)
+        draggingVideo(nullptr),
+        scaleFactor(1.0)
 {
     setAcceptDrops(true);
     lines = {50, 80, 110, 140, 170};
@@ -67,10 +68,20 @@ void TimeLine::dropEvent(QDropEvent *event)
     int nearestLine = findNearestLine(scenePos.y());
     qDebug() << "nearestLine:" << nearestLine;
 
-    QRect rect(scenePos.x() + 20, nearestLine, calculateVideoWidth(video.getDuration()), LINE_HEIGHT);
+    int videoWidth = calculateVideoWidth(video.getDuration()) * scaleFactor;
+    QRect rect(scenePos.x() + 20, nearestLine, videoWidth, LINE_HEIGHT);
     video.setRect(rect);
 
-    video.getRect().moveTopLeft(QPoint(100, nearestLine));
+    for (const VideoData &existingVideo : videoList)
+    {
+        if (existingVideo.getRect().intersects(rect))
+        {
+            event->ignore();
+            return;
+        }
+    }
+
+    video.setRect(rect);
     videoList.append(video);
 
     qDebug() << "Added video:";
@@ -160,6 +171,15 @@ void TimeLine::moveDraggingVideo(const QPoint &pos)
     int adjustedY = qBound(lines[0], findNearestLine(newPosition.y()), lines.last() - rect.height());
 
     rect.moveTopLeft(QPoint(adjustedX, adjustedY));
+
+    for (const VideoData &video : videoList)
+    {
+        if (video.getRect() != draggingVideo->getRect() && video.getRect().intersects(rect))
+        {
+            return;
+        }
+    }
+
     draggingVideo->setRect(rect);
     qDebug() << "Dragging " << draggingVideo->getTitle() << " to position: " << rect;
 }
@@ -197,6 +217,7 @@ void TimeLine::wheelEvent(QWheelEvent *event)
 
 void TimeLine::scaleVideos(double factor)
 {
+    scaleFactor *= factor;
     constexpr int MIN_WIDTH = 10;
     for (auto &video : videoList)
     {

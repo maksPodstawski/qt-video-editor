@@ -35,7 +35,7 @@ private:
 
     QList<int> lines;
     QList<VideoData> videoList;
-    double scaleFactor = 1.0;
+    double scaleFactor;
     VideoData *draggingVideo;
     QPoint dragStartPos;
 
