@@ -1,7 +1,10 @@
 #include "../include/VideoData.h"
 
-VideoData::VideoData(const QString &title, const QString &duration, const QString &filePath, const QString &extension)
-: title(title), duration(duration), filePath(filePath), extension(extension) {}
+VideoData::VideoData(const QString &title, const QString &duration, const QString &filePath, const QString &extension, const QRect &initialRect)
+    : title(title), duration(duration), filePath(filePath), extension(extension), rect(initialRect)
+{
+    color = generateRandomColor();
+}
 
 void VideoData::setFilePath(const QString &filePath) {
     this->filePath = filePath;
@@ -19,6 +22,10 @@ void VideoData::setExtension(const QString &extension) {
     this->extension = extension;
 }
 
+void VideoData::setRect(const QRect &rect) {
+    this->rect = rect;
+}
+
 QString VideoData::getTitle() const {
     return title;
 }
@@ -33,5 +40,21 @@ QString VideoData::getExtension() const {
 
 QString VideoData::getFilePath() const {
     return filePath;
+}
+
+QColor VideoData::getColor() const {
+    return color;
+}
+
+QRect VideoData::getRect() const {
+    return rect;
+}
+
+QRect& VideoData::getRect() {
+    return rect;
+}
+
+QColor VideoData::generateRandomColor() {
+    return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
 }
 

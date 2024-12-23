@@ -110,12 +110,18 @@ QByteArray VideoTable::serializeRow(int row) const
 {
     QTableWidgetItem *pathItem = tableWidget->item(row, 3);
     QTableWidgetItem *durationItem = tableWidget->item(row, 1);
+    QTableWidgetItem *titleItem = tableWidget->item(row, 0);
+    QTableWidgetItem *formatItem = tableWidget->item(row, 2);
 
     QString path = pathItem ? pathItem->data(Qt::UserRole).toString() : "";
+    QString duration = durationItem ? durationItem->text() : "";
+    QString title = titleItem ? titleItem->text() : "";
+    QString format = formatItem ? formatItem->text() : "";
 
     QByteArray itemData;
     QDataStream stream(&itemData, QIODevice::WriteOnly);
-    stream << row << pathItem->text() << durationItem->text() << pathItem->data(Qt::UserRole).toString();
+    stream << row << titleItem->text() << durationItem->text() << pathItem->data(Qt::UserRole).toString()
+           << formatItem->text();
 
     return itemData;
 }

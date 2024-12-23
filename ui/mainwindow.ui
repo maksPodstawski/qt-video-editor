@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1304</width>
+    <width>1276</width>
     <height>669</height>
    </rect>
   </property>
@@ -68,9 +68,12 @@
      <rect>
       <x>1200</x>
       <y>221</y>
-      <width>64</width>
-      <height>23</height>
+      <width>124</width>
+      <height>74</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="segmentStyle">
      <enum>QLCDNumber::Outline</enum>
@@ -92,9 +95,9 @@
    <widget class="QLabel" name="timeLabel">
     <property name="geometry">
      <rect>
-      <x>470</x>
+      <x>500</x>
       <y>380</y>
-      <width>131</width>
+      <width>91</width>
       <height>21</height>
      </rect>
     </property>
@@ -117,6 +120,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
     </property>
@@ -137,15 +143,28 @@
      <string/>
     </property>
    </widget>
-   <widget class="QGraphicsView" name="graphicsViewTimeLine">
+   <widget class="QScrollArea" name="timeLineScrollArea">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>430</y>
-      <width>1171</width>
-      <height>192</height>
+      <width>1241</width>
+      <height>171</height>
      </rect>
     </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>1239</width>
+       <height>169</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -153,7 +172,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1304</width>
+     <width>1276</width>
      <height>21</height>
     </rect>
    </property>
