@@ -161,7 +161,7 @@ void MainWindow::on_actionExport_triggered()
                                                     tr("Video Files (*.mp4)"));
     if (!fileName.isEmpty()) {
         QList<QString> inputFiles;
-        for (const VideoData &video : timeLine->getFilmsList()) {
+        for (const VideoData &video : timeLine->getVideoList()) {
             qDebug() << video.getFilePath();
             inputFiles.append(video.getFilePath());
         }

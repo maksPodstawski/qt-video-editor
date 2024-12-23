@@ -257,8 +257,8 @@ void TimeLine::updateVideoPositions()
     update();
 }
 
-QList<VideoData> TimeLine::getFilmsList() const {
-    return this->filmsList;
+QList<VideoData> TimeLine::getVideoList() const {
+    return this->videoList;
 }
 
 

@@ -20,7 +20,7 @@ class TimeLine : public QWidget
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
-    QList<VideoData> getFilmsList() const;
+    QList<VideoData> getVideoList() const;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -51,6 +51,7 @@ private:
     void moveDraggingVideo(const QPoint &pos);
     void scaleVideos(double factor);
     void updateVideoPositions();
+
 };
 
 #endif // TIMELINE_H
