@@ -2,6 +2,9 @@
 #define TIMELINE_H
 
 #include "VideoData.h"
+#include "Memento.h"
+#include "Originator.h"
+#include "Caretaker.h"
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QDragEnterEvent>
@@ -13,6 +16,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QShortcut>
 
 
 class TimeLine : public QWidget
@@ -20,6 +24,9 @@ class TimeLine : public QWidget
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
+
+    void saveState();
+    void undoState();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -50,6 +57,12 @@ private:
     void moveDraggingVideo(const QPoint &pos);
     void scaleVideos(double factor);
     void updateVideoPositions();
+    void setupShortcuts();
+
+    Caretaker caretaker;
+    Originator originator;
+    int currentStateIndex;
+    QShortcut *undoShortcut;
 };
 
 #endif // TIMELINE_H
