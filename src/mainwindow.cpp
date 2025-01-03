@@ -6,12 +6,13 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , videoPreviewWidget(new VideoPreview(this))
     , videoTable(new VideoTable(this))
     , timeLine(new TimeLine(this))
     , editor(new Editor)
 {
     ui->setupUi(this);
+
+    this->videoPreviewWidget = new VideoPreview(this->timeLine, this);
 
     QVBoxLayout *layout = new QVBoxLayout(ui->groupBoxVideo);
     layout->addWidget(videoPreviewWidget);
@@ -94,7 +95,6 @@ void MainWindow::on_actionOpen_triggered()
         tr("Video and Audio Files (*.mp4 *.avi *.mov *.mp3 *.wav *.flac)"));
     if (!fileNames.isEmpty()) {
         QList<QString> videoFiles = fileNames.toVector().toList();
-        videoPreviewWidget->setVideoFiles(videoFiles);
         ui->pauseButton->setEnabled(false);
         positionUpdateTimer->start(1000);
 

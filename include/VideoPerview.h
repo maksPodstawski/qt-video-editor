@@ -2,6 +2,7 @@
 #define VIDEOPERVIEW_H
 
 #include "VideoData.h"
+#include "TimeLine.h"
 #include <QWidget>
 #include <QMediaPlayer>
 #include <QVideoWidget>
@@ -14,7 +15,7 @@ class VideoPreview : public QWidget
 {
     Q_OBJECT
 public:
-    explicit VideoPreview(QWidget *parent = nullptr);
+    explicit VideoPreview(TimeLine *timeLine, QWidget *parent = nullptr);
 
     void play();
     void pause();
@@ -30,12 +31,13 @@ private:
     QMediaPlayer *mediaPlayer;
     QVideoWidget *videoWidget;
     QAudioOutput *audioOutput;
-    QList<QString> videoFiles;
+    TimeLine *timeLine;
     int currentVideoIndex;
 
 private slots:
     void playNextVideo();
 
+    void updatePlayer();
 };
 
 #endif // VIDEOPERVIEW_H

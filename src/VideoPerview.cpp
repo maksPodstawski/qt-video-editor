@@ -1,18 +1,18 @@
 #include "../include/VideoPerview.h"
 
-VideoPreview::VideoPreview(QWidget *parent)
-    : QWidget{parent},
-    mediaPlayer(new QMediaPlayer(this)),
-    videoWidget(new QVideoWidget(this)),
-    audioOutput(new QAudioOutput(this)),
-    currentVideoIndex(0)
-{
+VideoPreview::VideoPreview(TimeLine *timeLine, QWidget *parent)
+        : QWidget{parent},
+          mediaPlayer(new QMediaPlayer(this)),
+          videoWidget(new QVideoWidget(this)),
+          audioOutput(new QAudioOutput(this)),
+          timeLine(timeLine),
+          currentVideoIndex(0) {
     mediaPlayer->setVideoOutput(videoWidget);
     mediaPlayer->setAudioOutput(audioOutput);
 
     audioOutput->setVolume(0.4);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QVBoxLayout * layout = new QVBoxLayout(this);
     layout->addWidget(videoWidget);
     setLayout(layout);
 
@@ -23,65 +23,59 @@ VideoPreview::VideoPreview(QWidget *parent)
     });
 }
 
-void VideoPreview::play()
-{
+void VideoPreview::play() {
+    const auto &videoList = timeLine->getVideoList();
+    for (auto &video: videoList) {
+        qDebug() << video.getFilePath();
+    }
+    updatePlayer();
     mediaPlayer->play();
 }
 
-void VideoPreview::stop()
-{
+void VideoPreview::stop() {
     mediaPlayer->stop();
 }
 
-void VideoPreview::pause()
-{
+void VideoPreview::pause() {
     mediaPlayer->pause();
 }
 
-void VideoPreview::setPosition(qint64 position)
-{
+void VideoPreview::setPosition(qint64 position) {
     mediaPlayer->setPosition(position);
 
 }
 
-void VideoPreview::setVideoFiles(const QList<QString> &files)
-{
-    videoFiles = files;
-    currentVideoIndex = 0;
-    if (!videoFiles.isEmpty()) {
-        mediaPlayer->setSource(QUrl::fromLocalFile(videoFiles[currentVideoIndex]));
-    }
+
+qint64 VideoPreview::getDuration() {
+    return mediaPlayer->duration();
 }
 
-qint64 VideoPreview::getDuration()
-{
-   return mediaPlayer->duration();
-}
-
-qint64 VideoPreview::getPosition()
-{
+qint64 VideoPreview::getPosition() {
     return mediaPlayer->position();
 }
 
-void VideoPreview::setVolume(float volume)
-{
+void VideoPreview::setVolume(float volume) {
     audioOutput->setVolume(volume);
 }
 
-float VideoPreview::getVolume() const
-{
+float VideoPreview::getVolume() const {
     return audioOutput->volume();
 }
 
-void VideoPreview::playNextVideo()
-{
-    if(currentVideoIndex++ < videoFiles.size())
-    {
-        mediaPlayer->setSource(QUrl::fromLocalFile(videoFiles[currentVideoIndex]));
-        mediaPlayer->play();
+void VideoPreview::updatePlayer() {
+    if(currentVideoIndex >= timeLine->getVideoList().size()) {
+        return;
     }
-    else
-    {
+    mediaPlayer->setSource(QUrl::fromLocalFile(timeLine->getVideoList()[currentVideoIndex].getFilePath()));
+}
+
+void VideoPreview::playNextVideo() {
+    const auto &videoList = timeLine->getVideoList();
+    if (currentVideoIndex + 1 < videoList.size()) {
+        currentVideoIndex++;
+        updatePlayer();
+        mediaPlayer->play();
+    } else {
         currentVideoIndex = 0;
     }
 }
