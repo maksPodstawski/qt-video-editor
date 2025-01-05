@@ -279,14 +279,23 @@ void TimeLine::undoState()
 {
     qDebug() << "Attempting undo. Current state index:" << currentStateIndex;
 
-    if (currentStateIndex > 0) {
+    if (currentStateIndex > 0)
+    {
         currentStateIndex--;
+
         originator.getStateFromMemento(caretaker.getMemento(currentStateIndex));
         videoList = originator.getState();
 
+        if(cutInProgress)
+        {
+            copiedVideo.reset();
+            cutInProgress = false;
+        }
+
         qDebug() << "Undo successful. New state index:" << currentStateIndex;
         update();
-    } else {
+    }
+    else {
         qDebug() << "Undo not possible. No more states to revert.";
     }
 }
@@ -295,6 +304,74 @@ void TimeLine::setupShortcuts()
 {
     undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
     connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
+    
 }
+
+void TimeLine::contextMenuEvent(QContextMenuEvent* event)
+{
+    for(auto i = videoList.begin(); i != videoList.end(); i++)
+    {
+        if(i->getRect().contains(event->pos()))
+        {
+            QMenu contextMenu(this);
+            QAction *copyAction = contextMenu.addAction("Copy");
+            QAction* cutAction = contextMenu.addAction("Cut");
+            QAction *deleteAction = contextMenu.addAction("Delete");
+            QAction *selectedAction = contextMenu.exec(event->globalPos());
+
+            if (selectedAction == copyAction)
+            {
+                copiedVideo = *i;
+                qDebug() << "Video copied: " << copiedVideo->getTitle();
+            }
+            else if (selectedAction == cutAction)
+            {
+                copiedVideo = *i;
+                cutInProgress = true;
+                videoList.erase(i);
+                saveState();
+                update();
+            }
+            else if (selectedAction == deleteAction)
+            {
+                videoList.erase(i);
+                saveState();
+                update();
+            }
+            return;
+        }
+    }
+
+    if (copiedVideo.has_value())
+    {
+        QMenu contextMenu(this);
+        QAction* pasteAction = contextMenu.addAction("Paste");
+        QAction* selectedAction = contextMenu.exec(event->globalPos());
+
+        if (selectedAction == pasteAction)
+        {
+            VideoData newVideo = copiedVideo.value();
+            QRect newRect = newVideo.getRect();
+
+            QPoint newPosition = event->pos();
+
+            int snappedY = findNearestLine(newPosition.y());
+            newRect.moveTo(newPosition.x(), snappedY);
+            newVideo.setRect(newRect);
+
+            videoList.push_back(newVideo);
+
+            if (cutInProgress)
+            {
+                copiedVideo.reset();
+                cutInProgress = false;
+            }
+
+            saveState();
+            update();
+        }
+    }
+}
+
 
 

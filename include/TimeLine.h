@@ -17,6 +17,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QShortcut>
+#include <QMenu>
 
 
 class TimeLine : public QWidget
@@ -37,6 +38,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void contextMenuEvent(QContextMenuEvent* event) override;
+
 
 private:
 
@@ -63,6 +66,12 @@ private:
     Originator originator;
     int currentStateIndex;
     QShortcut *undoShortcut;
+
+
+    std::optional<VideoData> copiedVideo;
+    std::optional<VideoData> cutVideo;
+    bool cutInProgress = false;
+
 };
 
 #endif // TIMELINE_H
