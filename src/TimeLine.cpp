@@ -4,10 +4,14 @@
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
         draggingVideo(nullptr),
-        scaleFactor(1.0)
+        scaleFactor(1.0),
+        currentStateIndex(-1)
 {
     setAcceptDrops(true);
     lines = {50, 80, 110, 140, 170};
+
+    setupShortcuts();
+    saveState();
 }
 
 void TimeLine::paintEvent(QPaintEvent *event)
@@ -90,6 +94,7 @@ void TimeLine::dropEvent(QDropEvent *event)
     qDebug() << "Duration:" << video.getDuration();
     qDebug() << "Format:" << video.getExtension();
 
+    saveState();
     update();
     event->accept();
 }
@@ -196,6 +201,7 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event)
         updateVideoPositions();
         draggingVideo = nullptr;
         qDebug() << "Film released at position: " << rect;
+        saveState();
         update();
     }
 }
@@ -256,6 +262,117 @@ void TimeLine::updateVideoPositions()
 
     update();
 }
+
+void TimeLine::saveState()
+{
+    qDebug() << "Saving state. Current state index before save:" << currentStateIndex;
+
+    caretaker.clearMementosAfter(currentStateIndex);
+    originator.setState(videoList);
+    caretaker.addMemento(originator.saveStateToMemento());
+    currentStateIndex++;
+
+    qDebug() << "State saved. Current state index after save:" << currentStateIndex;
+}
+
+void TimeLine::undoState()
+{
+    qDebug() << "Attempting undo. Current state index:" << currentStateIndex;
+
+    if (currentStateIndex > 0)
+    {
+        currentStateIndex--;
+
+        originator.getStateFromMemento(caretaker.getMemento(currentStateIndex));
+        videoList = originator.getState();
+
+        if(cutInProgress)
+        {
+            copiedVideo.reset();
+            cutInProgress = false;
+        }
+
+        qDebug() << "Undo successful. New state index:" << currentStateIndex;
+        update();
+    }
+    else {
+        qDebug() << "Undo not possible. No more states to revert.";
+    }
+}
+
+void TimeLine::setupShortcuts()
+{
+    undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+    connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
+
+}
+
+void TimeLine::contextMenuEvent(QContextMenuEvent* event)
+{
+    for(auto i = videoList.begin(); i != videoList.end(); i++)
+    {
+        if(i->getRect().contains(event->pos()))
+        {
+            QMenu contextMenu(this);
+            QAction *copyAction = contextMenu.addAction("Copy");
+            QAction* cutAction = contextMenu.addAction("Cut");
+            QAction *deleteAction = contextMenu.addAction("Delete");
+            QAction *selectedAction = contextMenu.exec(event->globalPos());
+
+            if (selectedAction == copyAction)
+            {
+                copiedVideo = *i;
+                qDebug() << "Video copied: " << copiedVideo->getTitle();
+            }
+            else if (selectedAction == cutAction)
+            {
+                copiedVideo = *i;
+                cutInProgress = true;
+                videoList.erase(i);
+                saveState();
+                update();
+            }
+            else if (selectedAction == deleteAction)
+            {
+                videoList.erase(i);
+                saveState();
+                update();
+            }
+            return;
+        }
+    }
+
+    if (copiedVideo.has_value())
+    {
+        QMenu contextMenu(this);
+        QAction* pasteAction = contextMenu.addAction("Paste");
+        QAction* selectedAction = contextMenu.exec(event->globalPos());
+
+        if (selectedAction == pasteAction)
+        {
+            VideoData newVideo = copiedVideo.value();
+            QRect newRect = newVideo.getRect();
+
+            QPoint newPosition = event->pos();
+
+            int snappedY = findNearestLine(newPosition.y());
+            newRect.moveTo(newPosition.x(), snappedY);
+            newVideo.setRect(newRect);
+
+            videoList.push_back(newVideo);
+
+            if (cutInProgress)
+            {
+                copiedVideo.reset();
+                cutInProgress = false;
+            }
+
+            saveState();
+            update();
+        }
+    }
+}
+
 
 QList<VideoData> TimeLine::getVideoList() const {
     return this->videoList;

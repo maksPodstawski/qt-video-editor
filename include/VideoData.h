@@ -8,6 +8,7 @@
 class VideoData {
 public:
     VideoData(const QString &title, const QString &duration, const QString &filePath, const QString &extension, const QRect &initialRect);
+    VideoData() : title(""), duration(""), filePath(""), extension(""), rect(QRect()), color(generateRandomColor()) {}
 
     QString getTitle() const;
     QString getDuration() const;
