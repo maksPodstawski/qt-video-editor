@@ -25,6 +25,7 @@ class TimeLine : public QWidget
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
+    QList<VideoData> getVideoList() const;
 
     void saveState();
     void undoState();

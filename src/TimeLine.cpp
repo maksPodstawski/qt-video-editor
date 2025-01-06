@@ -304,7 +304,7 @@ void TimeLine::setupShortcuts()
 {
     undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
     connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
-    
+
 }
 
 void TimeLine::contextMenuEvent(QContextMenuEvent* event)
@@ -373,5 +373,9 @@ void TimeLine::contextMenuEvent(QContextMenuEvent* event)
     }
 }
 
+
+QList<VideoData> TimeLine::getVideoList() const {
+    return this->videoList;
+}
 
 
