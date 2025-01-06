@@ -5,6 +5,7 @@
 #include "Memento.h"
 #include "Originator.h"
 #include "Caretaker.h"
+#include "Indicator.h"
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QDragEnterEvent>
@@ -18,7 +19,7 @@
 #include <QWidget>
 #include <QShortcut>
 #include <QMenu>
-
+#include <QSlider>
 
 class TimeLine : public QWidget
 {
@@ -50,6 +51,8 @@ private:
     VideoData *draggingVideo;
     QPoint dragStartPos;
 
+    Indicator *indicator;
+
     const int LINE_HEIGHT = 30;
 
     int findNearestLine(int y);
@@ -63,6 +66,9 @@ private:
     void updateVideoPositions();
     void setupShortcuts();
 
+    void setupSlider();
+    void onSliderValueChanged(int value);
+
     Caretaker caretaker;
     Originator originator;
     int currentStateIndex;
@@ -73,6 +79,7 @@ private:
     std::optional<VideoData> cutVideo;
     bool cutInProgress = false;
 
+    void setupIndicator();
 };
 
 #endif // TIMELINE_H

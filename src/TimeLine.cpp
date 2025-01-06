@@ -11,6 +11,7 @@ TimeLine::TimeLine(QWidget *parent)
     lines = {50, 80, 110, 140, 170};
 
     setupShortcuts();
+    setupIndicator();
     saveState();
 }
 
@@ -20,6 +21,10 @@ void TimeLine::paintEvent(QPaintEvent *event)
     drawLines(painter);
     drawVideos(painter);
     drawTextOnVideos(painter);
+
+    painter.setPen(QPen(Qt::red, 2));
+    painter.drawLine(indicator->x(), indicator->y() + indicator->height(),
+                     indicator->x(), height());
 }
 
 void TimeLine::drawVideos(QPainter &painter)
@@ -377,5 +382,12 @@ void TimeLine::contextMenuEvent(QContextMenuEvent* event)
 QList<VideoData> TimeLine::getVideoList() const {
     return this->videoList;
 }
+
+void TimeLine::setupIndicator() {
+    indicator = new Indicator(this);
+    indicator->move(10, 10);
+}
+
+
 
 

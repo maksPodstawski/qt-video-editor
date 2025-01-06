@@ -35,6 +35,12 @@ add_executable(video_editor
         src/Originator.cpp
         src/Memento.cpp
         src/Caretaker.cpp
+        include/VideoCombiner.h
+        src/VideoCombiner.cpp
+        src/Editor.cpp
+        include/Editor.h
+        src/Indicator.cpp
+        include/Indicator.h
 )
 
 target_link_libraries(video_editor

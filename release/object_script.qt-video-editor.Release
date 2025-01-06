@@ -1,0 +1,14 @@
+release/AudioData.o
+release/TimeLine.o
+release/VideoData.o
+release/VideoPerview.o
+release/VideoTable.o
+release/main.o
+release/mainwindow.o
+release/VideoCombiner.o
+release/Editor.o
+release/moc_TimeLine.o
+release/moc_VideoPerview.o
+release/moc_VideoTable.o
+release/moc_mainwindow.o
+release/moc_VideoCombiner.o
