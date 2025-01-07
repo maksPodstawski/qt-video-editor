@@ -35,7 +35,7 @@ void Indicator::mouseMoveEvent(QMouseEvent *event)
         int newX = x() + event->pos().x() - dragStartPos.x();
         newX = qMax(0, qMin(newX, parentWidget()->width() - width()));
         move(newX, y());
-        qDebug() << "Indicator moved to: " << getPostion();
+        qDebug() << "Indicator moved to: " << getPosition();
         emit parentWidget()->update();
     }
 }
@@ -48,6 +48,13 @@ void Indicator::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-QPoint Indicator::getPostion() const {
+QPoint Indicator::getPosition() const {
     return pos();
+}
+
+void Indicator::contextMenuEvent(QContextMenuEvent *event) {
+    QMenu contextMenu(this);
+    QAction *getVideoAction = contextMenu.addAction("Get Current Video");
+    connect(getVideoAction, &QAction::triggered, this, &Indicator::requestCurrentVideo);
+    contextMenu.exec(event->globalPos());
 }

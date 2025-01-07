@@ -66,9 +66,6 @@ private:
     void updateVideoPositions();
     void setupShortcuts();
 
-    void setupSlider();
-    void onSliderValueChanged(int value);
-
     Caretaker caretaker;
     Originator originator;
     int currentStateIndex;
@@ -80,6 +77,16 @@ private:
     bool cutInProgress = false;
 
     void setupIndicator();
+
+    const VideoData* getCurrentIndicatorVideo() const;
+
+    QTime getVideoDurationTime();
+    int getVideoDurationWidth();
+
+    double getTimePerUnit();
+    double calculateTimeFromVideoStart(const VideoData &video, int x);
+
+
 };
 
 #endif // TIMELINE_H

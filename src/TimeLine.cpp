@@ -13,6 +13,17 @@ TimeLine::TimeLine(QWidget *parent)
     setupShortcuts();
     setupIndicator();
     saveState();
+
+    connect(indicator, &Indicator::requestCurrentVideo, this, [this]() {
+        const VideoData *currentVideo = getCurrentIndicatorVideo();
+        if (currentVideo) {
+            qDebug() << "Current video under indicator:" << currentVideo->getTitle() << "at position:" << currentVideo->getRect().x() << indicator->getPosition().x();
+            qDebug () << "Time per unit: " << getTimePerUnit();
+            qDebug () << "Time from start: " << calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+        } else {
+            qDebug() << "No video under indicator.";
+        }
+    });
 }
 
 void TimeLine::paintEvent(QPaintEvent *event)
@@ -209,6 +220,7 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event)
         saveState();
         update();
     }
+    qDebug() << getVideoDurationTime();
 }
 
 void TimeLine::wheelEvent(QWheelEvent *event)
@@ -385,8 +397,53 @@ QList<VideoData> TimeLine::getVideoList() const {
 
 void TimeLine::setupIndicator() {
     indicator = new Indicator(this);
-    indicator->move(10, 10);
+    indicator->move(0, 0);
 }
+
+const VideoData *TimeLine::getCurrentIndicatorVideo() const {
+    int indicatorPos = indicator->getPosition().x();
+    for(const VideoData &video : videoList) {
+        QRect videoRect = video.getRect();
+        if(videoRect.left() <= indicatorPos && videoRect.right() >= indicatorPos) {
+            return &video;
+        }
+    }
+    return nullptr;
+}
+
+QTime TimeLine::getVideoDurationTime() {
+    int totalSeconds = 0;
+    for (const VideoData &video : videoList) {
+        QTime duration = QTime::fromString(video.getDuration(), "mm:ss");
+        totalSeconds += QTime(0, 0).secsTo(duration);
+    }
+    return QTime(0, 0).addSecs(totalSeconds);
+}
+
+int TimeLine::getVideoDurationWidth() {
+    int totalWidth = 0;
+    for (const VideoData &video : videoList) {
+        totalWidth += video.getRect().width();
+    }
+    return totalWidth;
+}
+
+double TimeLine::getTimePerUnit() {
+    int totalSeconds = QTime(0, 0).secsTo(getVideoDurationTime());
+    int totalWidth = getVideoDurationWidth();
+    if (totalWidth == 0) {
+        return 0.0;
+    }
+    return static_cast<double>(totalSeconds) / totalWidth;
+}
+
+double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
+    int videoStart = video.getRect().left();
+    int distance = x - videoStart;
+    return distance * getTimePerUnit();
+}
+
+
 
 
 
