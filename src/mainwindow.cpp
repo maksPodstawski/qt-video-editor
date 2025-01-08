@@ -161,10 +161,20 @@ void MainWindow::on_actionExport_triggered()
                                                     tr("Video Files (*.mp4)"));
     if (!fileName.isEmpty()) {
         QList<QString> inputFiles;
-        for (const VideoData &video : timeLine->getVideoList()) {
+        for (VideoData &video : timeLine->getVideoList()) {
             qDebug() << video.getFilePath();
+            if (video.isTrimPending()) {
+                QString trimmedFilePath = QDir::temp().absoluteFilePath(QFileInfo(video.getFilePath()).completeBaseName() + "_trimmed." + QFileInfo(video.getFilePath()).suffix());
+                if (editor->trimVideo(video.getFilePath(), video.getTrimStart())) {
+                    video.setFilePath(trimmedFilePath);
+                } else {
+                    QMessageBox::critical(this, "Error", "Failed to trim video: " + video.getFilePath());
+                    return;
+                }
+            }
             inputFiles.append(video.getFilePath());
         }
+
 
         VideoCombiner *combiner = new VideoCombiner(editor, inputFiles, fileName, this);
         connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {

@@ -65,6 +65,7 @@ private:
     void scaleVideos(double factor);
     void updateVideoPositions();
     void setupShortcuts();
+    void trimVideoAtIndicator();
 
     Caretaker caretaker;
     Originator originator;

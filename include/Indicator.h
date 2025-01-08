@@ -29,6 +29,7 @@ private:
 
 signals:
     void requestCurrentVideo();
+    void cutRight();
 };
 
 #endif //VIDEO_EDITOR_INDICATOR_H

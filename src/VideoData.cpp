@@ -58,3 +58,16 @@ QColor VideoData::generateRandomColor() {
     return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
 }
 
+bool VideoData::isTrimPending() const {
+    return trimPending;
+}
+
+void VideoData::setTrimPending(double trimStartTime) {
+    this->trimPending = true;
+    this->trimStart = trimStartTime;
+}
+
+double VideoData::getTrimStart() const {
+    return trimStart;
+}
+

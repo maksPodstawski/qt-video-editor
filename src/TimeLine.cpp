@@ -3,10 +3,9 @@
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
-        draggingVideo(nullptr),
-        scaleFactor(1.0),
-        currentStateIndex(-1)
-{
+          draggingVideo(nullptr),
+          scaleFactor(1.0),
+          currentStateIndex(-1) {
     setAcceptDrops(true);
     lines = {50, 80, 110, 140, 170};
 
@@ -17,17 +16,27 @@ TimeLine::TimeLine(QWidget *parent)
     connect(indicator, &Indicator::requestCurrentVideo, this, [this]() {
         const VideoData *currentVideo = getCurrentIndicatorVideo();
         if (currentVideo) {
-            qDebug() << "Current video under indicator:" << currentVideo->getTitle() << "at position:" << currentVideo->getRect().x() << indicator->getPosition().x();
-            qDebug () << "Time per unit: " << getTimePerUnit();
-            qDebug () << "Time from start: " << calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+            qDebug() << "Current video under indicator:" << currentVideo->getTitle() << "at position:"
+                     << currentVideo->getRect().x() << indicator->getPosition().x();
+            qDebug() << "Time per unit: " << getTimePerUnit();
+            qDebug() << "Time from start: " << calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
         } else {
             qDebug() << "No video under indicator.";
         }
     });
+
+    connect(indicator, &Indicator::cutRight, this, [this]() {
+        const VideoData *currentVideo = getCurrentIndicatorVideo();
+        if (currentVideo) {
+            qDebug() << "Cutting video at indicator position.";
+            trimVideoAtIndicator();
+        }
+    });
 }
 
-void TimeLine::paintEvent(QPaintEvent *event)
-{
+
+
+void TimeLine::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     drawLines(painter);
     drawVideos(painter);
@@ -38,37 +47,30 @@ void TimeLine::paintEvent(QPaintEvent *event)
                      indicator->x(), height());
 }
 
-void TimeLine::drawVideos(QPainter &painter)
-{
-    for (const VideoData &video : videoList)
-    {
+void TimeLine::drawVideos(QPainter &painter) {
+    for (const VideoData &video: videoList) {
         QRect videoRect = video.getRect();
         painter.setBrush(QBrush(video.getColor()));
         painter.drawRect(videoRect);
     }
 }
 
-void TimeLine::drawTextOnVideos(QPainter &painter)
-{
+void TimeLine::drawTextOnVideos(QPainter &painter) {
     painter.setPen(QPen(Qt::black));
-    for (const VideoData &video : videoList)
-    {
+    for (const VideoData &video: videoList) {
         QRect videoRect = video.getRect();
         painter.drawText(videoRect, Qt::AlignCenter, video.getTitle());
     }
 }
 
-void TimeLine::drawLines(QPainter &painter)
-{
+void TimeLine::drawLines(QPainter &painter) {
     painter.setPen(QPen(Qt::black, 2));
-    for (int line : lines)
-    {
+    for (int line: lines) {
         painter.drawLine(0, line, width(), line);
     }
 }
 
-void TimeLine::dropEvent(QDropEvent *event)
-{
+void TimeLine::dropEvent(QDropEvent *event) {
     qDebug() << "Drop event";
     if (!event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         qDebug() << "Invalid mime format";
@@ -77,8 +79,7 @@ void TimeLine::dropEvent(QDropEvent *event)
     }
 
     VideoData video = extractVideoData(event->mimeData());
-    if (video.getFilePath().isEmpty())
-    {
+    if (video.getFilePath().isEmpty()) {
         event->ignore();
         return;
     }
@@ -92,10 +93,8 @@ void TimeLine::dropEvent(QDropEvent *event)
     QRect rect(scenePos.x() + 20, nearestLine, videoWidth, LINE_HEIGHT);
     video.setRect(rect);
 
-    for (const VideoData &existingVideo : videoList)
-    {
-        if (existingVideo.getRect().intersects(rect))
-        {
+    for (const VideoData &existingVideo: videoList) {
+        if (existingVideo.getRect().intersects(rect)) {
             event->ignore();
             return;
         }
@@ -115,14 +114,12 @@ void TimeLine::dropEvent(QDropEvent *event)
     event->accept();
 }
 
-VideoData TimeLine::extractVideoData(const QMimeData *mimeData)
-{
+VideoData TimeLine::extractVideoData(const QMimeData *mimeData) {
     QByteArray itemData = mimeData->data("application/x-qabstractitemmodeldatalist");
     QDataStream stream(itemData);
     QString filePath, duration, title, format;
 
-    while (!stream.atEnd())
-    {
+    while (!stream.atEnd()) {
         int row, col;
         QMap<int, QVariant> valueMap;
         stream >> row >> col >> valueMap;
@@ -136,35 +133,26 @@ VideoData TimeLine::extractVideoData(const QMimeData *mimeData)
     return VideoData(title, duration, filePath, format, QRect());
 }
 
-int TimeLine::calculateVideoWidth(const QString &duration)
-{
+int TimeLine::calculateVideoWidth(const QString &duration) {
     int totalSeconds = QTime::fromString(duration, "mm:ss").msecsSinceStartOfDay() / 1000;
     return totalSeconds;
 }
 
-void TimeLine::dragEnterEvent(QDragEnterEvent *event)
-{
-    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
-    {
+void TimeLine::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
         event->accept();
-    }
-    else
-    {
+    } else {
         event->ignore();
     }
 }
 
-void TimeLine::dragMoveEvent(QDragMoveEvent *event)
-{
+void TimeLine::dragMoveEvent(QDragMoveEvent *event) {
     event->acceptProposedAction();
 }
 
-void TimeLine::mousePressEvent(QMouseEvent *event)
-{
-    for (VideoData &video : videoList)
-    {
-        if (video.getRect().contains(event->pos()))
-        {
+void TimeLine::mousePressEvent(QMouseEvent *event) {
+    for (VideoData &video: videoList) {
+        if (video.getRect().contains(event->pos())) {
             draggingVideo = &video;
             dragStartPos = event->pos() - video.getRect().topLeft();
 
@@ -174,17 +162,14 @@ void TimeLine::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TimeLine::mouseMoveEvent(QMouseEvent *event)
-{
-    if (draggingVideo)
-    {
+void TimeLine::mouseMoveEvent(QMouseEvent *event) {
+    if (draggingVideo) {
         moveDraggingVideo(event->pos());
         update();
     }
 }
 
-void TimeLine::moveDraggingVideo(const QPoint &pos)
-{
+void TimeLine::moveDraggingVideo(const QPoint &pos) {
     QRect rect = draggingVideo->getRect();
     QPoint newPosition = pos - dragStartPos;
 
@@ -193,10 +178,8 @@ void TimeLine::moveDraggingVideo(const QPoint &pos)
 
     rect.moveTopLeft(QPoint(adjustedX, adjustedY));
 
-    for (const VideoData &video : videoList)
-    {
-        if (video.getRect() != draggingVideo->getRect() && video.getRect().intersects(rect))
-        {
+    for (const VideoData &video: videoList) {
+        if (video.getRect() != draggingVideo->getRect() && video.getRect().intersects(rect)) {
             return;
         }
     }
@@ -205,10 +188,8 @@ void TimeLine::moveDraggingVideo(const QPoint &pos)
     qDebug() << "Dragging " << draggingVideo->getTitle() << " to position: " << rect;
 }
 
-void TimeLine::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (draggingVideo)
-    {
+void TimeLine::mouseReleaseEvent(QMouseEvent *event) {
+    if (draggingVideo) {
         QRect rect = draggingVideo->getRect();
 
         rect.moveTopLeft(QPoint(rect.topLeft().x(), findNearestLine(rect.topLeft().y())));
@@ -223,42 +204,33 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event)
     qDebug() << getVideoDurationTime();
 }
 
-void TimeLine::wheelEvent(QWheelEvent *event)
-{
+void TimeLine::wheelEvent(QWheelEvent *event) {
 
-    if (event->modifiers() & Qt::ControlModifier)
-    {
+    if (event->modifiers() & Qt::ControlModifier) {
         scaleVideos(event->angleDelta().y() > 0 ? 1.1 : 0.9);
         event->accept();
         update();
-    }
-    else
-    {
+    } else {
         QWidget::wheelEvent(event);
     }
 }
 
-void TimeLine::scaleVideos(double factor)
-{
+void TimeLine::scaleVideos(double factor) {
     scaleFactor *= factor;
     constexpr int MIN_WIDTH = 10;
-    for (auto &video : videoList)
-    {
+    for (auto &video: videoList) {
         int newWidth = static_cast<int>(video.getRect().width() * factor);
         video.getRect().setWidth(qMax(newWidth, MIN_WIDTH));
     }
 }
 
-int TimeLine::findNearestLine(int y)
-{
+int TimeLine::findNearestLine(int y) {
     int nearestLine = lines[0];
     int minDistance = qAbs(y - lines[0]);
 
-    for (int line : lines)
-    {
+    for (int line: lines) {
         int distance = qAbs(y - line);
-        if (distance < minDistance)
-        {
+        if (distance < minDistance) {
             minDistance = distance;
             nearestLine = line;
         }
@@ -267,21 +239,19 @@ int TimeLine::findNearestLine(int y)
     return nearestLine;
 }
 
-void TimeLine::updateVideoPositions()
-{
+void TimeLine::updateVideoPositions() {
     std::sort(videoList.begin(), videoList.end(), [](const VideoData &a, const VideoData &b) {
         return a.getRect().left() < b.getRect().left();
     });
 
     qDebug() << "Sorted videos:";
-    for (const VideoData &video : videoList)
+    for (const VideoData &video: videoList)
         qDebug() << "Film:" << video.getTitle() << "at x=" << video.getRect().left();
 
     update();
 }
 
-void TimeLine::saveState()
-{
+void TimeLine::saveState() {
     qDebug() << "Saving state. Current state index before save:" << currentStateIndex;
 
     caretaker.clearMementosAfter(currentStateIndex);
@@ -292,65 +262,52 @@ void TimeLine::saveState()
     qDebug() << "State saved. Current state index after save:" << currentStateIndex;
 }
 
-void TimeLine::undoState()
-{
+void TimeLine::undoState() {
     qDebug() << "Attempting undo. Current state index:" << currentStateIndex;
 
-    if (currentStateIndex > 0)
-    {
+    if (currentStateIndex > 0) {
         currentStateIndex--;
 
         originator.getStateFromMemento(caretaker.getMemento(currentStateIndex));
         videoList = originator.getState();
 
-        if(cutInProgress)
-        {
+        if (cutInProgress) {
             copiedVideo.reset();
             cutInProgress = false;
         }
 
         qDebug() << "Undo successful. New state index:" << currentStateIndex;
         update();
-    }
-    else {
+    } else {
         qDebug() << "Undo not possible. No more states to revert.";
     }
 }
 
-void TimeLine::setupShortcuts()
-{
+void TimeLine::setupShortcuts() {
     undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
     connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
 
 }
 
-void TimeLine::contextMenuEvent(QContextMenuEvent* event)
-{
-    for(auto i = videoList.begin(); i != videoList.end(); i++)
-    {
-        if(i->getRect().contains(event->pos()))
-        {
+void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
+    for (auto i = videoList.begin(); i != videoList.end(); i++) {
+        if (i->getRect().contains(event->pos())) {
             QMenu contextMenu(this);
-            QAction *copyAction = contextMenu.addAction("Copy");
-            QAction* cutAction = contextMenu.addAction("Cut");
-            QAction *deleteAction = contextMenu.addAction("Delete");
-            QAction *selectedAction = contextMenu.exec(event->globalPos());
+            QAction * copyAction = contextMenu.addAction("Copy");
+            QAction * cutAction = contextMenu.addAction("Cut");
+            QAction * deleteAction = contextMenu.addAction("Delete");
+            QAction * selectedAction = contextMenu.exec(event->globalPos());
 
-            if (selectedAction == copyAction)
-            {
+            if (selectedAction == copyAction) {
                 copiedVideo = *i;
                 qDebug() << "Video copied: " << copiedVideo->getTitle();
-            }
-            else if (selectedAction == cutAction)
-            {
+            } else if (selectedAction == cutAction) {
                 copiedVideo = *i;
                 cutInProgress = true;
                 videoList.erase(i);
                 saveState();
                 update();
-            }
-            else if (selectedAction == deleteAction)
-            {
+            } else if (selectedAction == deleteAction) {
                 videoList.erase(i);
                 saveState();
                 update();
@@ -359,14 +316,12 @@ void TimeLine::contextMenuEvent(QContextMenuEvent* event)
         }
     }
 
-    if (copiedVideo.has_value())
-    {
+    if (copiedVideo.has_value()) {
         QMenu contextMenu(this);
-        QAction* pasteAction = contextMenu.addAction("Paste");
-        QAction* selectedAction = contextMenu.exec(event->globalPos());
+        QAction * pasteAction = contextMenu.addAction("Paste");
+        QAction * selectedAction = contextMenu.exec(event->globalPos());
 
-        if (selectedAction == pasteAction)
-        {
+        if (selectedAction == pasteAction) {
             VideoData newVideo = copiedVideo.value();
             QRect newRect = newVideo.getRect();
 
@@ -378,8 +333,7 @@ void TimeLine::contextMenuEvent(QContextMenuEvent* event)
 
             videoList.push_back(newVideo);
 
-            if (cutInProgress)
-            {
+            if (cutInProgress) {
                 copiedVideo.reset();
                 cutInProgress = false;
             }
@@ -402,9 +356,9 @@ void TimeLine::setupIndicator() {
 
 const VideoData *TimeLine::getCurrentIndicatorVideo() const {
     int indicatorPos = indicator->getPosition().x();
-    for(const VideoData &video : videoList) {
+    for (const VideoData &video: videoList) {
         QRect videoRect = video.getRect();
-        if(videoRect.left() <= indicatorPos && videoRect.right() >= indicatorPos) {
+        if (videoRect.left() <= indicatorPos && videoRect.right() >= indicatorPos) {
             return &video;
         }
     }
@@ -413,7 +367,7 @@ const VideoData *TimeLine::getCurrentIndicatorVideo() const {
 
 QTime TimeLine::getVideoDurationTime() {
     int totalSeconds = 0;
-    for (const VideoData &video : videoList) {
+    for (const VideoData &video: videoList) {
         QTime duration = QTime::fromString(video.getDuration(), "mm:ss");
         totalSeconds += QTime(0, 0).secsTo(duration);
     }
@@ -422,7 +376,7 @@ QTime TimeLine::getVideoDurationTime() {
 
 int TimeLine::getVideoDurationWidth() {
     int totalWidth = 0;
-    for (const VideoData &video : videoList) {
+    for (const VideoData &video: videoList) {
         totalWidth += video.getRect().width();
     }
     return totalWidth;
@@ -441,6 +395,29 @@ double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
     int videoStart = video.getRect().left();
     int distance = x - videoStart;
     return distance * getTimePerUnit();
+}
+
+void TimeLine::trimVideoAtIndicator() {
+    VideoData *currentVideo = const_cast<VideoData *>(getCurrentIndicatorVideo());
+    if (currentVideo) {
+        double trimTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+        currentVideo->setTrimPending(trimTime);
+
+        int indicatorPos = indicator->getPosition().x();
+        QRect videoRect = currentVideo->getRect();
+        if(indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
+            int newWidth = indicatorPos - videoRect.left();
+            videoRect.setWidth(newWidth);
+            videoRect.setRight(indicatorPos);
+            currentVideo->setRect(videoRect);
+            update();
+        }
+    }
+    for(VideoData &video: videoList) {
+        if(video.isTrimPending()) {
+            qDebug() << "Trimming video:" << video.getTitle() << "at:" << video.getTrimStart();
+        }
+    }
 }
 
 

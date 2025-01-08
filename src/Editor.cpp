@@ -92,3 +92,31 @@ bool Editor::combineVideos(const QStringList &inputFiles, const QString &outputF
     return true;
 }
 
+bool Editor::trimVideo(const QString &inputFile, double startTime) {
+    if(!QFile::exists(inputFile)) {
+        qWarning() << "File does not exist:" << inputFile;
+        return false;
+    }
+
+    QFileInfo fileInfo(inputFile);
+    QString outputFile = QDir::temp().absoluteFilePath(fileInfo.completeBaseName() + "_trimmed." + fileInfo.suffix());
+
+    QStringList trimArgs;
+    trimArgs << "-i" << inputFile
+             << "-t" << QString::number(startTime)
+             << "-c" << "copy"
+             << outputFile;
+
+    QProcess trimProcess;
+    trimProcess.start("ffmpeg", trimArgs);
+    trimProcess.waitForFinished();
+
+    if (trimProcess.exitStatus() != QProcess::NormalExit || trimProcess.exitCode() != 0) {
+        qWarning() << "Failed to trim video:" << inputFile;
+        return false;
+    }
+
+    qDebug() << "Video successfully trimmed into:" << outputFile;
+    return true;
+}
+
