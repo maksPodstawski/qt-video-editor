@@ -160,23 +160,14 @@ void MainWindow::on_actionExport_triggered()
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save video file"), "",
                                                     tr("Video Files (*.mp4)"));
     if (!fileName.isEmpty()) {
-        QList<QString> inputFiles;
+        QList<VideoData> updatedVideoList;
         for (VideoData &video : timeLine->getVideoList()) {
-            qDebug() << video.getFilePath();
-            if (video.isTrimPending()) {
-                QString trimmedFilePath = QDir::temp().absoluteFilePath(QFileInfo(video.getFilePath()).completeBaseName() + "_trimmed." + QFileInfo(video.getFilePath()).suffix());
-                if (editor->trimVideo(video.getFilePath(), video.getTrimStart())) {
-                    video.setFilePath(trimmedFilePath);
-                } else {
-                    QMessageBox::critical(this, "Error", "Failed to trim video: " + video.getFilePath());
-                    return;
-                }
-            }
-            inputFiles.append(video.getFilePath());
+            video.executeOperations();
+            qDebug() << "Exporting video: " << video.getFilePath();
+            updatedVideoList.append(video);
         }
 
-
-        VideoCombiner *combiner = new VideoCombiner(editor, inputFiles, fileName, this);
+        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName, this);
         connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {
             if (success) {
                 QMessageBox::information(this, "Success", "Video exported successfully");

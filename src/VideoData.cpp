@@ -50,24 +50,21 @@ QRect VideoData::getRect() const {
     return rect;
 }
 
-QRect& VideoData::getRect() {
-    return rect;
-}
-
 QColor VideoData::generateRandomColor() {
     return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
 }
 
-bool VideoData::isTrimPending() const {
-    return trimPending;
+void VideoData::addOperation(Operation *operation) {
+    operations.append(operation);
 }
 
-void VideoData::setTrimPending(double trimStartTime) {
-    this->trimPending = true;
-    this->trimStart = trimStartTime;
+void VideoData::executeOperations() {
+    for (Operation *operation: operations) {
+        this->filePath = operation->execute();
+    }
 }
 
-double VideoData::getTrimStart() const {
-    return trimStart;
+QList<Operation *> VideoData::getOperations() const {
+    return this->operations;
 }
 

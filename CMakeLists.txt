@@ -41,6 +41,10 @@ add_executable(video_editor
         include/Editor.h
         src/Indicator.cpp
         include/Indicator.h
+        src/Operation.cpp
+        include/Operation.h
+        src/CutRightOperation.cpp
+        include/CutRightOperation.h
 )
 
 target_link_libraries(video_editor

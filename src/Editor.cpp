@@ -7,41 +7,20 @@
 #include <QDir>
 
 
-bool Editor::combineVideos(const QStringList &inputFiles, const QString &outputFile) {
-    if (inputFiles.isEmpty()) {
-        qWarning() << "No input files provided.";
+bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile) {
+    if (inputVideos.isEmpty()) {
+        qWarning() << "No input videos provided.";
         return false;
     }
 
     QStringList normalizedFiles;
 
-    for (int i = 0; i < inputFiles.size(); ++i) {
-        QString inputFile = inputFiles[i];
-        if (!QFile::exists(inputFile)) {
-            qWarning() << "File does not exist:" << inputFile;
-            return false;
-        }
-
+    for (int i = 0; i < inputVideos.size(); ++i) {
+        QString inputFile = inputVideos[i].getFilePath();
+        qDebug() << "Normalizing video:" << inputFile;
         QString normalizedFile = QDir::temp().absoluteFilePath(QString("normalized_%1.mp4").arg(i));
-        QStringList normalizeArgs;
-        normalizeArgs << "-i" << inputFile
-                      << "-vf" << "scale=1280:720"
-                      << "-r" << "30"
-                      << "-c:v" << "libx264"
-                      << "-preset" << "fast"
-                      << "-c:a" << "aac"
-                      << "-ar" << "48000"
-                      << "-ac" << "2"
-                      << "-strict" << "experimental"
-                      << normalizedFile;
 
-
-        QProcess normalizeProcess;
-        normalizeProcess.start("ffmpeg", normalizeArgs);
-        normalizeProcess.waitForFinished();
-
-        if (normalizeProcess.exitStatus() != QProcess::NormalExit || normalizeProcess.exitCode() != 0) {
-            qWarning() << "Failed to normalize video:" << inputFile;
+        if (!normalizeVideo(inputFile, normalizedFile, "1280:720", 30, "libx264", "aac", 48000, 2)) {
             return false;
         }
 
@@ -65,6 +44,7 @@ bool Editor::combineVideos(const QStringList &inputFiles, const QString &outputF
     combineArgs << "-f" << "concat"
                 << "-safe" << "0"
                 << "-i" << tempFile
+                << "-vf" << "scale=1280:720"
                 << "-c:v" << "libx264"
                 << "-preset" << "fast"
                 << "-c:a" << "aac"
@@ -72,7 +52,6 @@ bool Editor::combineVideos(const QStringList &inputFiles, const QString &outputF
                 << "-ar" << "48000"
                 << "-ac" << "2"
                 << outputFile;
-
 
     QProcess combineProcess;
     combineProcess.start("ffmpeg", combineArgs);
@@ -92,14 +71,11 @@ bool Editor::combineVideos(const QStringList &inputFiles, const QString &outputF
     return true;
 }
 
-bool Editor::trimVideo(const QString &inputFile, double startTime) {
+bool Editor::trimVideo(const QString &inputFile, const QString &outputFile , double startTime) {
     if(!QFile::exists(inputFile)) {
         qWarning() << "File does not exist:" << inputFile;
         return false;
     }
-
-    QFileInfo fileInfo(inputFile);
-    QString outputFile = QDir::temp().absoluteFilePath(fileInfo.completeBaseName() + "_trimmed." + fileInfo.suffix());
 
     QStringList trimArgs;
     trimArgs << "-i" << inputFile
@@ -119,4 +95,36 @@ bool Editor::trimVideo(const QString &inputFile, double startTime) {
     qDebug() << "Video successfully trimmed into:" << outputFile;
     return true;
 }
+
+bool Editor::normalizeVideo(const QString &inputFile, const QString &outputFile, const QString &resolution, int frameRate,
+                       const QString &videoCodec, const QString &audioCodec, int audioRate, int audioChannels) {
+    if (!QFile::exists(inputFile)) {
+        qWarning() << "File does not exist:" << inputFile;
+        return false;
+    }
+
+    QStringList normalizeArgs;
+    normalizeArgs << "-i" << inputFile
+                  << "-vf" << QString("scale=%1").arg(resolution)
+                  << "-r" << QString::number(frameRate)
+                  << "-c:v" << videoCodec
+                  << "-preset" << "fast"
+                  << "-c:a" << audioCodec
+                  << "-ar" << QString::number(audioRate)
+                  << "-ac" << QString::number(audioChannels)
+                  << "-strict" << "experimental"
+                  << outputFile;
+
+    QProcess normalizeProcess;
+    normalizeProcess.start("ffmpeg", normalizeArgs);
+    normalizeProcess.waitForFinished();
+
+    if (normalizeProcess.exitStatus() != QProcess::NormalExit || normalizeProcess.exitCode() != 0) {
+        qWarning() << "Failed to normalize video:" << inputFile;
+        return false;
+    }
+
+    return true;
+}
+
 

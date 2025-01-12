@@ -4,6 +4,10 @@
 #include <QColor>
 #include <QRect>
 #include <QString>
+#include "Operation.h"
+#include "CutRightOperation.h"
+
+class Operation;
 
 class VideoData {
 public:
@@ -16,18 +20,20 @@ public:
     QString getFilePath() const;
     QColor getColor() const;
     QRect getRect() const;
-    QRect& getRect();
-    bool isTrimPending() const;
-    void setTrimPending(double trimStartTime);
+    void addOperation(Operation* operation);
+    void executeOperations();
+    QList<Operation*> getOperations() const;
+
 
     void setFilePath(const QString &filePath);
     void setTitle(const QString &title);
     void setDuration(const QString &duration);
     void setExtension(const QString &extension);
     void setRect(const QRect &rect);
-    double getTrimStart() const;
+
 
     QColor generateRandomColor();
+
 
 private:
     QString title;
@@ -36,8 +42,8 @@ private:
     QString filePath;
     QRect rect;
     QColor color;
-    bool trimPending;
-    double trimStart;
+    QList<Operation*> operations;
+
 };
 
 #endif //VIDEO_EDITOR_VIDEO_H

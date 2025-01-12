@@ -1,5 +1,6 @@
 #include "../include/TimeLine.h"
 #include "../include/VideoPerview.h"
+#include "../include/CutRightOperation.h"
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
@@ -398,14 +399,17 @@ double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
 }
 
 void TimeLine::trimVideoAtIndicator() {
-    VideoData *currentVideo = const_cast<VideoData *>(getCurrentIndicatorVideo());
+    VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
     if (currentVideo) {
         double trimTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
-        currentVideo->setTrimPending(trimTime);
+
+        QString filePath = currentVideo->getFilePath();
+
+        currentVideo->addOperation(new CutRightOperation(filePath, trimTime));
 
         int indicatorPos = indicator->getPosition().x();
         QRect videoRect = currentVideo->getRect();
-        if(indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
+        if (indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
             int newWidth = indicatorPos - videoRect.left();
             videoRect.setWidth(newWidth);
             videoRect.setRight(indicatorPos);
@@ -413,9 +417,9 @@ void TimeLine::trimVideoAtIndicator() {
             update();
         }
     }
-    for(VideoData &video: videoList) {
-        if(video.isTrimPending()) {
-            qDebug() << "Trimming video:" << video.getTitle() << "at:" << video.getTrimStart();
+    for (VideoData& video : videoList) {
+        if (video.getOperations().length() > 0) {
+            qDebug() << "Trimming video:" << video.getTitle();
         }
     }
 }

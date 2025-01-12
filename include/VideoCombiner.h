@@ -17,21 +17,20 @@ class VideoCombiner : public QThread
 Q_OBJECT
 
 public:
-    VideoCombiner(Editor *editor, const QList<QString> &inputFiles, const QString &outputFileName, QObject *parent = nullptr)
-            : QThread(parent), editor(editor), inputFiles(inputFiles), outputFileName(outputFileName) {}
+    VideoCombiner(const QList<VideoData> &inputVideos, const QString &outputFileName, QObject *parent = nullptr)
+            : QThread(parent), inputFiles(inputVideos), outputFileName(outputFileName) {}
 
 signals:
     void combineFinished(bool success);
 
 protected:
     void run() override {
-        bool success = editor->combineVideos(inputFiles, outputFileName);
+        bool success = Editor::combineVideos(inputFiles, outputFileName);
         emit combineFinished(success);
     }
 
 private:
-    Editor *editor;
-    QList<QString> inputFiles;
+    QList<VideoData> inputFiles;
     QString outputFileName;
 };
 

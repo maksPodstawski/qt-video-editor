@@ -7,11 +7,13 @@
 
 
 #include <QString>
+#include "VideoData.h"
 
 class Editor {
 public:
-    bool combineVideos(const QStringList &inputFiles, const QString &outputFile);
-    bool trimVideo(const QString &inputFile, double startTime);
+    static bool trimVideo(const QString &inputFile, const QString &outputFile ,double startTime);
+    static bool normalizeVideo(const QString &inputFile, const QString &outputFile, const QString &resolution, int frameRate, const QString &videoCodec, const QString &audioCodec, int audioRate, int audioChannels);
+    static bool combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile);
 };
 
 
