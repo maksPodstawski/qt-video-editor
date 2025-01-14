@@ -66,6 +66,7 @@ private:
     void updateVideoPositions();
     void setupShortcuts();
     void trimVideoAtIndicator();
+    void cutLeftVideoAtIndicator();
 
     Caretaker caretaker;
     Originator originator;

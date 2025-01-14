@@ -56,8 +56,10 @@ void Indicator::contextMenuEvent(QContextMenuEvent *event) {
     QMenu contextMenu(this);
     QAction *getVideoAction = contextMenu.addAction("Get Current Video");
     QAction *cutRightAction = contextMenu.addAction("Cut Right");
+    QAction *cutLeftAction = contextMenu.addAction("Cut Left");
 
     connect(cutRightAction, &QAction::triggered, this, &Indicator::cutRight);
+    connect(cutLeftAction, &QAction::triggered, this, &Indicator::cutLeft);
 
     connect(getVideoAction, &QAction::triggered, this, &Indicator::requestCurrentVideo);
     contextMenu.exec(event->globalPos());

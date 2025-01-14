@@ -96,8 +96,33 @@ bool Editor::trimVideo(const QString &inputFile, const QString &outputFile , dou
     return true;
 }
 
+bool Editor::cutVideo(const QString &inputFile, const QString &outputFile, double cutTime) {
+    if(!QFile::exists(inputFile)) {
+        qWarning() << "File does not exist:" << inputFile;
+        return false;
+    }
+
+    QStringList trimArgs;
+    trimArgs << "-i" << inputFile
+             << "-ss" << QString::number(cutTime)
+             << "-c" << "copy"
+             << outputFile;
+
+    QProcess trimProcess;
+    trimProcess.start("ffmpeg", trimArgs);
+    trimProcess.waitForFinished();
+
+    if (trimProcess.exitStatus() != QProcess::NormalExit || trimProcess.exitCode() != 0) {
+        qWarning() << "Failed to cut video:" << inputFile;
+        return false;
+    }
+
+    qDebug() << "Video successfully cut into:" << outputFile;
+    return true;
+}
+
 bool Editor::normalizeVideo(const QString &inputFile, const QString &outputFile, const QString &resolution, int frameRate,
-                       const QString &videoCodec, const QString &audioCodec, int audioRate, int audioChannels) {
+                            const QString &videoCodec, const QString &audioCodec, int audioRate, int audioChannels) {
     if (!QFile::exists(inputFile)) {
         qWarning() << "File does not exist:" << inputFile;
         return false;

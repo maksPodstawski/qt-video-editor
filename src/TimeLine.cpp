@@ -1,6 +1,7 @@
 #include "../include/TimeLine.h"
 #include "../include/VideoPerview.h"
 #include "../include/CutRightOperation.h"
+#include "../include/CutLeftOperation.h"
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
@@ -29,8 +30,16 @@ TimeLine::TimeLine(QWidget *parent)
     connect(indicator, &Indicator::cutRight, this, [this]() {
         const VideoData *currentVideo = getCurrentIndicatorVideo();
         if (currentVideo) {
-            qDebug() << "Cutting video at indicator position.";
+            qDebug() << "Cutting RIGHT video at indicator position.";
             trimVideoAtIndicator();
+        }
+    });
+
+    connect(indicator, &Indicator::cutLeft, this, [this]() {
+        const VideoData *currentVideo = getCurrentIndicatorVideo();
+        if (currentVideo) {
+            qDebug() << "Cutting LEFT video at indicator position.";
+            cutLeftVideoAtIndicator();
         }
     });
 }
@@ -396,6 +405,33 @@ double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
     int videoStart = video.getRect().left();
     int distance = x - videoStart;
     return distance * getTimePerUnit();
+}
+
+void TimeLine::cutLeftVideoAtIndicator() {
+    VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
+    if (currentVideo) {
+        double cutTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+
+        QString filePath = currentVideo->getFilePath();
+
+        currentVideo->addOperation(new CutLeftOperation(filePath, cutTime));
+
+        int indicatorPos = indicator->getPosition().x();
+        QRect videoRect = currentVideo->getRect();
+        if (indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
+            int newWidth = videoRect.right() - indicatorPos;
+            videoRect.setLeft(indicatorPos);
+            videoRect.setWidth(newWidth);
+            currentVideo->setRect(videoRect);
+            update();
+        }
+    }
+
+    for (VideoData& video : videoList) {
+        if (video.getOperations().length() > 0) {
+            qDebug() << "CUTTING video:" << video.getTitle();
+        }
+    }
 }
 
 void TimeLine::trimVideoAtIndicator() {
