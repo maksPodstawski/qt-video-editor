@@ -9,11 +9,9 @@
 
 class CutLeftOperation: public Operation {
 public:
-    CutLeftOperation(QString &filePath, double cutTime): Operation(filePath), cutTime(cutTime) {};
+    CutLeftOperation(QString &filePath, double cutTime): Operation(filePath, cutTime){};
     QString execute() override;
 
-private:
-    double cutTime;
 };
 
 

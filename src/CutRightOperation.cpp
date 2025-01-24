@@ -17,7 +17,7 @@ QString CutRightOperation::execute() {
         QFile::remove(trimmedFilePath);
     }
 
-    Editor::trimVideo(filePath, trimmedFilePath, this->trimStartTime);
+    Editor::trimVideo(filePath, trimmedFilePath, this->operationTime);
 
     return trimmedFilePath;
 }

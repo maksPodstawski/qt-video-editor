@@ -16,7 +16,7 @@ QString CutLeftOperation::execute() {
         QFile::remove(cutVideoPath);
     }
 
-    Editor::cutVideo(filePath, cutVideoPath, this->cutTime);
+    Editor::cutVideo(filePath, cutVideoPath, this->operationTime);
 
     return cutVideoPath;
 }

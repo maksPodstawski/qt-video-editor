@@ -31,6 +31,7 @@ signals:
     void requestCurrentVideo();
     void cutRight();
     void cutLeft();
+    void split();
 };
 
 #endif //VIDEO_EDITOR_INDICATOR_H

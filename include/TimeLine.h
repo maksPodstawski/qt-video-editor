@@ -30,6 +30,10 @@ public:
 
     void saveState();
     void undoState();
+    Indicator *indicator;
+    double getTimePerUnit();
+    const VideoData* getCurrentIndicatorVideo() const;
+    const int getCurrentVideoIndexIndicator() const;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -51,8 +55,6 @@ private:
     VideoData *draggingVideo;
     QPoint dragStartPos;
 
-    Indicator *indicator;
-
     const int LINE_HEIGHT = 30;
 
     int findNearestLine(int y);
@@ -67,6 +69,7 @@ private:
     void setupShortcuts();
     void trimVideoAtIndicator();
     void cutLeftVideoAtIndicator();
+    void splitVideoAtIndicator();
 
     Caretaker caretaker;
     Originator originator;
@@ -80,12 +83,12 @@ private:
 
     void setupIndicator();
 
-    const VideoData* getCurrentIndicatorVideo() const;
+
 
     QTime getVideoDurationTime();
     int getVideoDurationWidth();
 
-    double getTimePerUnit();
+
     double calculateTimeFromVideoStart(const VideoData &video, int x);
 
 };
