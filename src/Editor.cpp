@@ -130,11 +130,13 @@ bool Editor::normalizeVideo(const QString &inputFile, const QString &outputFile,
 
     QStringList normalizeArgs;
     normalizeArgs << "-i" << inputFile
-                  << "-vf" << QString("scale=%1").arg(resolution)
+                  << "-vf" << QString("scale=%1,unsharp=5:5:1.0:5:5:0.0").arg(resolution)
                   << "-r" << QString::number(frameRate)
-                  << "-c:v" << videoCodec
-                  << "-preset" << "fast"
+                  << "-c:v" << "libx265"
+                  << "-preset" << "medium"
+                  << "-b:v" << "5M"
                   << "-c:a" << audioCodec
+                  << "-b:a" << "192k"
                   << "-ar" << QString::number(audioRate)
                   << "-ac" << QString::number(audioChannels)
                   << "-strict" << "experimental"

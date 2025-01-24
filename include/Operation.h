@@ -11,9 +11,11 @@ class Operation {
 public:
     virtual QString execute() = 0;
     virtual ~Operation() = default;
-    explicit Operation(const QString &filePath);
+    explicit Operation(const QString &filePath, double operationTime);
+    double getOperationTime() { return operationTime; }
 protected:
     QString filePath;
+    double operationTime;
 };
 
 

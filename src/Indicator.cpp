@@ -57,9 +57,11 @@ void Indicator::contextMenuEvent(QContextMenuEvent *event) {
     QAction *getVideoAction = contextMenu.addAction("Get Current Video");
     QAction *cutRightAction = contextMenu.addAction("Cut Right");
     QAction *cutLeftAction = contextMenu.addAction("Cut Left");
+    QAction *splitAction =  contextMenu.addAction("Split");
 
     connect(cutRightAction, &QAction::triggered, this, &Indicator::cutRight);
     connect(cutLeftAction, &QAction::triggered, this, &Indicator::cutLeft);
+    connect(splitAction, &QAction::triggered, this, &Indicator::split);
 
     connect(getVideoAction, &QAction::triggered, this, &Indicator::requestCurrentVideo);
     contextMenu.exec(event->globalPos());
