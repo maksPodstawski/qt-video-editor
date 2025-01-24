@@ -88,7 +88,6 @@ private:
     double getTimePerUnit();
     double calculateTimeFromVideoStart(const VideoData &video, int x);
 
-
 };
 
 #endif // TIMELINE_H

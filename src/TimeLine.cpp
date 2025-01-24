@@ -7,7 +7,8 @@ TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
           draggingVideo(nullptr),
           scaleFactor(1.0),
-          currentStateIndex(-1) {
+          currentStateIndex(-1)
+{
     setAcceptDrops(true);
     lines = {50, 80, 110, 140, 170};
 
@@ -459,6 +460,8 @@ void TimeLine::trimVideoAtIndicator() {
         }
     }
 }
+
+
 
 
 

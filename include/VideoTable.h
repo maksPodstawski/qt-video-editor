@@ -6,7 +6,6 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QFileInfo>
-#include <QTableWidgetItem>
 #include <QMediaPlayer>
 #include <QPainter>
 #include <QMouseEvent>
@@ -15,6 +14,10 @@
 #include <QApplication>
 #include <QMimeData>
 #include <QDrag>
+#include <QMenu>
+#include <QMessageBox>
+#include <QStandardItemModel>
+
 
 
 class VideoTable : public QWidget
@@ -33,12 +36,15 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    QTableWidget *tableWidget;
+
+    QTableView *tableView;
+    QStandardItemModel *tableModel;
     QPoint dragStartPosition;
     QByteArray serializeRow(int row) const;
 
-    void startDrag(const QPoint &pos);
     void setUpTableWidget();
+    void startDrag(const QPoint &pos);
+    void showContextMenu(const QPoint &pos);
 };
 
 #endif // VIDEOTABLE_H

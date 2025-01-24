@@ -2,26 +2,34 @@
 
 VideoTable::VideoTable(QWidget *parent)
     : QWidget{parent},
-    tableWidget(new QTableWidget(this))
+    tableView(new QTableView(this))
 {
     setUpTableWidget();
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(tableWidget);
+    layout->addWidget(tableView);
     setLayout(layout);
+
+    connect(tableView, &QTableView::customContextMenuRequested, this, &VideoTable::showContextMenu);
 }
 
 void VideoTable::setUpTableWidget()
 {
-    tableWidget->setColumnCount(4);
-    tableWidget->setHorizontalHeaderLabels({"Title", "Duration", "Format", "Path"});
-    tableWidget->setDragEnabled(true);
-    tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    tableWidget->setDragDropMode(QAbstractItemView::DragOnly);
+    tableModel = new QStandardItemModel(this);
+    tableModel->setColumnCount(4);
+    tableModel->setHorizontalHeaderLabels({"Title", "Duration", "Format", "Path"});
+
+    tableView->setModel(tableModel);
+    tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    tableView->setDragEnabled(true);
+    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tableView->setDragDropMode(QAbstractItemView::DragOnly);
+    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void VideoTable::updateTable(const QList<QString> &mediaFiles)
 {
-    tableWidget->setRowCount(mediaFiles.size());
+    int currentRowCount = tableModel->rowCount();
+    tableModel->setRowCount(currentRowCount + mediaFiles.size());
 
     for(int i = 0; i < mediaFiles.size(); ++i)
     {
@@ -32,14 +40,22 @@ void VideoTable::updateTable(const QList<QString> &mediaFiles)
         QString durationText = getDurationText(mediaFiles[i]);
         QString format = getFileFormat(mediaFiles[i]);
 
-        QTableWidgetItem *titleItem = new QTableWidgetItem(title);
-        titleItem->setData(Qt::UserRole, filePath);
+        QStandardItem *titleItem = new QStandardItem(title);
+        QStandardItem *durationItem = new QStandardItem(durationText);
+        QStandardItem *formatItem = new QStandardItem(format);
+        QStandardItem *pathItem = new QStandardItem(filePath);
 
-        tableWidget->setItem(i, 0, titleItem);
-        tableWidget->setItem(i, 1, new QTableWidgetItem(durationText));
-        tableWidget->setItem(i, 2, new QTableWidgetItem(format));
-        tableWidget->setItem(i, 3, new QTableWidgetItem(filePath));
+        titleItem->setFlags(titleItem->flags() & ~Qt::ItemIsEditable);
+        durationItem->setFlags(durationItem->flags() & ~Qt::ItemIsEditable);
+        formatItem->setFlags(formatItem->flags() & ~Qt::ItemIsEditable);
 
+        titleItem->setData(filePath, Qt::UserRole);
+
+        int newRow = currentRowCount + i;
+        tableModel->setItem(newRow, 0, titleItem);
+        tableModel->setItem(newRow, 1, durationItem);
+        tableModel->setItem(newRow, 2, formatItem);
+        tableModel->setItem(newRow, 3, pathItem);
     }
 }
 
@@ -82,7 +98,7 @@ void VideoTable::mouseMoveEvent(QMouseEvent *event)
     if ((event->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance())
         return;
 
-    QModelIndex index = tableWidget->indexAt(dragStartPosition);
+    QModelIndex index = tableView->indexAt(dragStartPosition);
     if (!index.isValid())
         return;
 
@@ -91,7 +107,7 @@ void VideoTable::mouseMoveEvent(QMouseEvent *event)
 
 void VideoTable::startDrag(const QPoint &pos)
 {
-    QModelIndex index = tableWidget->indexAt(pos);
+    QModelIndex index = tableView->indexAt(pos);
     if (!index.isValid())
         return;
 
@@ -108,20 +124,52 @@ void VideoTable::startDrag(const QPoint &pos)
 
 QByteArray VideoTable::serializeRow(int row) const
 {
-    QTableWidgetItem *pathItem = tableWidget->item(row, 3);
-    QTableWidgetItem *durationItem = tableWidget->item(row, 1);
-    QTableWidgetItem *titleItem = tableWidget->item(row, 0);
-    QTableWidgetItem *formatItem = tableWidget->item(row, 2);
+    QStandardItem  *titleItem = tableModel->item(row, 0);
+    QStandardItem  *durationItem = tableModel->item(row, 1);
+    QStandardItem  *formatItem = tableModel->item(row, 2);
+    QStandardItem *pathItem = tableModel->item(row, 3);
 
-    QString path = pathItem ? pathItem->data(Qt::UserRole).toString() : "";
     QString duration = durationItem ? durationItem->text() : "";
     QString title = titleItem ? titleItem->text() : "";
     QString format = formatItem ? formatItem->text() : "";
+    QString path = pathItem ? pathItem->data(Qt::UserRole).toString() : "";
 
     QByteArray itemData;
     QDataStream stream(&itemData, QIODevice::WriteOnly);
-    stream << row << titleItem->text() << durationItem->text() << pathItem->data(Qt::UserRole).toString()
-           << formatItem->text();
+    stream << row << titleItem->text() << durationItem->text() << formatItem->text() << pathItem->data(Qt::UserRole).toString();
 
     return itemData;
+}
+
+
+void VideoTable::showContextMenu(const QPoint& pos)
+{
+    QModelIndex index = tableView->indexAt(pos);
+    if (!index.isValid()) {
+        return;
+    }
+
+    QMenu contextMenu(this);
+    QAction *showFileInfo = contextMenu.addAction("Show File Info");
+    QAction *removeVideo = contextMenu.addAction("Remove Video");
+    QAction *selectedAction = contextMenu.exec(tableView->viewport()->mapToGlobal(pos));
+
+    if (selectedAction == showFileInfo) {
+        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
+        QFileInfo fileInfo(filePath);
+        QString title = fileInfo.baseName();
+        QString durationText = getDurationText(filePath);
+        QString format = fileInfo.suffix().toUpper();
+
+        QString message = QString("Title: %1\nDuration: %2\nFormat: %3\nPath: %4")
+                         .arg(title)
+                         .arg(durationText)
+                         .arg(format)
+                         .arg(filePath);
+
+        QMessageBox::information(this, "File Info", message);
+    }
+    else if (selectedAction == removeVideo) {
+        tableModel->removeRow(index.row());
+    }
 }
