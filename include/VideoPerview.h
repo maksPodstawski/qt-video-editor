@@ -39,9 +39,11 @@ private:
     QMediaPlayer *mediaPlayer;
     QVideoWidget *videoWidget;
     QAudioOutput *audioOutput;
-    void determineStartEndTimes(const VideoData &videoData, qint64 &startTime, qint64 &endTime);
+    void determineStartEndTimes(const VideoData &videoData, qreal &startTime, qreal &endTime);
     QList<QTimer*> indicatorTimers;
     int currentVideoIndex;
+
+    qint64 m_iVideoPosition;
 
 private slots:
     void playNextVideo();

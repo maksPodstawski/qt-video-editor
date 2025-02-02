@@ -24,7 +24,7 @@ void Indicator::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         dragging = true;
-        dragStartPos = event->pos();
+        dragStartPos = event->position();
     }
 }
 
@@ -32,8 +32,8 @@ void Indicator::mouseMoveEvent(QMouseEvent *event)
 {
     if (dragging)
     {
-        int newX = x() + event->pos().x() - dragStartPos.x();
-        newX = qMax(0, qMin(newX, parentWidget()->width() - width()));
+        qreal newX = x() + event->position().x() - dragStartPos.x();
+        newX = qMax(0.0, qMin(newX, static_cast<qreal>(parentWidget()->width() - width())));
         move(newX, y());
         qDebug() << "Indicator moved to: " << getPosition();
         emit parentWidget()->update();
@@ -48,7 +48,7 @@ void Indicator::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-QPoint Indicator::getPosition() const {
+QPointF Indicator::getPosition() const {
     return pos();
 }
 

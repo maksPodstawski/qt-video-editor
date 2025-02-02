@@ -1,8 +1,11 @@
 #include "../include/VideoData.h"
+#include "QTime"
 
 VideoData::VideoData(const QString &title, const QString &duration, const QString &filePath, const QString &extension, const QRect &initialRect)
     : title(title), duration(duration), filePath(filePath), extension(extension), rect(initialRect)
 {
+    startTime = 0;
+    endTime = -1;
     color = generateRandomColor();
 }
 
@@ -24,6 +27,14 @@ void VideoData::setExtension(const QString &extension) {
 
 void VideoData::setRect(const QRect &rect) {
     this->rect = rect;
+}
+
+void VideoData::setStartTime(qreal startTime) {
+    this->startTime = startTime;
+}
+
+void VideoData::setEndTime(qreal endTime) {
+    this->endTime = endTime;
 }
 
 QString VideoData::getTitle() const {

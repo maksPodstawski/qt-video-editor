@@ -14,7 +14,7 @@ class Indicator : public QWidget
 Q_OBJECT
 public:
     explicit Indicator(QWidget *parent = nullptr);
-    QPoint getPosition() const;
+    QPointF getPosition() const;
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -25,7 +25,7 @@ protected:
 
 private:
     bool dragging;
-    QPoint dragStartPos;
+    QPointF dragStartPos;
 
 signals:
     void requestCurrentVideo();

@@ -79,7 +79,7 @@ bool Editor::trimVideo(const QString &inputFile, const QString &outputFile , dou
 
     QStringList trimArgs;
     trimArgs << "-i" << inputFile
-             << "-t" << QString::number(startTime)
+            << "-t" << QString::number(startTime / 1000.0, 'f', 3)
              << "-c" << "copy"
              << outputFile;
 
@@ -104,7 +104,7 @@ bool Editor::cutVideo(const QString &inputFile, const QString &outputFile, doubl
 
     QStringList trimArgs;
     trimArgs << "-i" << inputFile
-             << "-ss" << QString::number(cutTime)
+             << "-ss" << QString::number(cutTime / 1000.0, 'f', 3)
              << "-c" << "copy"
              << outputFile;
 

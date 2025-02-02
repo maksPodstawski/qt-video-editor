@@ -15,7 +15,7 @@ public:
     double getOperationTime() { return operationTime; }
 protected:
     QString filePath;
-    double operationTime;
+    qreal operationTime;
 };
 
 

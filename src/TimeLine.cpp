@@ -6,7 +6,7 @@
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
           draggingVideo(nullptr),
-          scaleFactor(1.0),
+          scaleFactor(10.0),
           currentStateIndex(-1)
 {
     setAcceptDrops(true);
@@ -396,12 +396,12 @@ const int TimeLine::getCurrentVideoIndexIndicator() const {
 }
 
 QTime TimeLine::getVideoDurationTime() {
-    int totalSeconds = 0;
+    int totalMilliseconds = 0;
     for (const VideoData &video: videoList) {
         QTime duration = QTime::fromString(video.getDuration(), "mm:ss");
-        totalSeconds += QTime(0, 0).secsTo(duration);
+        totalMilliseconds += QTime(0, 0).msecsTo(duration);
     }
-    return QTime(0, 0).addSecs(totalSeconds);
+    return QTime(0, 0).addMSecs(totalMilliseconds);
 }
 
 int TimeLine::getVideoDurationWidth() {
@@ -412,16 +412,16 @@ int TimeLine::getVideoDurationWidth() {
     return totalWidth;
 }
 
-double TimeLine::getTimePerUnit() {
-    int totalSeconds = QTime(0, 0).secsTo(getVideoDurationTime());
+qreal TimeLine::getTimePerUnit() {
+    int totalMilliseconds = QTime(0, 0).msecsTo(getVideoDurationTime());
     int totalWidth = getVideoDurationWidth();
     if (totalWidth == 0) {
         return 0.0;
     }
-    return static_cast<double>(totalSeconds) / totalWidth;
+    return static_cast<qreal>(totalMilliseconds) / totalWidth;
 }
 
-double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
+qreal TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
     int videoStart = video.getRect().left();
     int distance = x - videoStart;
     return distance * getTimePerUnit();
@@ -430,11 +430,12 @@ double TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
 void TimeLine::cutLeftVideoAtIndicator() {
     VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
     if (currentVideo) {
-        double cutTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+        qreal cutTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
 
         QString filePath = currentVideo->getFilePath();
 
         currentVideo->addOperation(new CutLeftOperation(filePath, cutTime));
+        currentVideo->setStartTime(cutTime);
 
         int indicatorPos = indicator->getPosition().x();
         QRect videoRect = currentVideo->getRect();
@@ -487,7 +488,10 @@ void TimeLine::trimVideoAtIndicator() {
 
         QString filePath = currentVideo->getFilePath();
 
+        qDebug() << "Trim TIme: " << trimTime;
+
         currentVideo->addOperation(new CutRightOperation(filePath, trimTime));
+        currentVideo->setEndTime(trimTime);
 
         int indicatorPos = indicator->getPosition().x();
         QRect videoRect = currentVideo->getRect();

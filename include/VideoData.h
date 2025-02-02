@@ -5,7 +5,7 @@
 #include <QRect>
 #include <QString>
 #include "Operation.h"
-#include "CutRightOperation.h"
+
 
 class Operation;
 
@@ -31,6 +31,11 @@ public:
     void setExtension(const QString &extension);
     void setRect(const QRect &rect);
 
+    void setStartTime(qreal startTime);
+    void setEndTime(qreal endTime);
+
+    qreal getStartTime() const;
+    qreal getEndTime() const;
 
     QColor generateRandomColor();
 
@@ -44,6 +49,16 @@ private:
     QColor color;
     QList<Operation*> operations;
 
+    qreal startTime;
+    qreal endTime;
+
 };
 
+inline qreal VideoData::getStartTime() const {
+    return this->startTime;
+}
+
+inline qreal VideoData::getEndTime() const {
+    return this->endTime;
+}
 #endif //VIDEO_EDITOR_VIDEO_H
