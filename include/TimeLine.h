@@ -55,9 +55,12 @@ private:
     VideoData *draggingVideo;
     QPoint dragStartPos;
 
-    const int LINE_HEIGHT = 30;
+    const int LINE_HEIGHT = 60;
 
     int findNearestLine(int y);
+
+    void drawContentLabels(QPainter &painter);
+
     void drawVideos(QPainter &painter);
     void drawLines(QPainter &painter);
     void drawTextOnVideos(QPainter &painter);
@@ -66,6 +69,9 @@ private:
     void moveDraggingVideo(const QPoint &pos);
     void scaleVideos(double factor);
     void updateVideoPositions();
+
+    void drawSectionBackgrounds(QPainter &painter);
+
     void setupShortcuts();
     void trimVideoAtIndicator();
     void cutLeftVideoAtIndicator();

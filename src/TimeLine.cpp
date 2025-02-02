@@ -10,7 +10,7 @@ TimeLine::TimeLine(QWidget *parent)
           currentStateIndex(-1)
 {
     setAcceptDrops(true);
-    lines = {50, 80, 110, 140, 170};
+    lines = { 0, 60, 120, 180};
 
     setupShortcuts();
     setupIndicator();
@@ -57,6 +57,9 @@ TimeLine::TimeLine(QWidget *parent)
 
 void TimeLine::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
+
+    drawSectionBackgrounds(painter);
+    drawContentLabels(painter);
     drawLines(painter);
     drawVideos(painter);
     drawTextOnVideos(painter);
@@ -192,7 +195,7 @@ void TimeLine::moveDraggingVideo(const QPoint &pos) {
     QRect rect = draggingVideo->getRect();
     QPoint newPosition = pos - dragStartPos;
 
-    int adjustedX = qBound(0, newPosition.x(), width() - rect.width());
+    int adjustedX = qBound(60, newPosition.x(), width() - rect.width());
     int adjustedY = qBound(lines[0], findNearestLine(newPosition.y()), lines.last() - rect.height());
 
     rect.moveTopLeft(QPoint(adjustedX, adjustedY));
@@ -244,18 +247,29 @@ void TimeLine::scaleVideos(double factor) {
 }
 
 int TimeLine::findNearestLine(int y) {
-    int nearestLine = lines[0];
-    int minDistance = qAbs(y - lines[0]);
-
-    for (int line: lines) {
-        int distance = qAbs(y - line);
-        if (distance < minDistance) {
-            minDistance = distance;
-            nearestLine = line;
-        }
+    if (y < lines[1]) {
+        return lines[0];
+    } else if (y < lines[2]) {
+        return lines[1];
+    } else {
+        return lines[2];
     }
+}
 
-    return nearestLine;
+void TimeLine::drawContentLabels(QPainter &painter) {
+    painter.setPen(QPen(Qt::black));
+    QFont font = painter.font();
+    font.setBold(true);
+    painter.setFont(font);
+
+    QRect videoLabelRect(10, lines[1] - 50, 100, 30);
+    painter.drawText(videoLabelRect, Qt::AlignLeft | Qt::AlignVCenter, "Video");
+
+    QRect textLabelRect(10, lines[2] - 50, 100, 30);
+    painter.drawText(textLabelRect, Qt::AlignLeft | Qt::AlignVCenter, "Text");
+
+    QRect imageLabelRect(10, lines[3] - 50, 100, 30);
+    painter.drawText(imageLabelRect, Qt::AlignLeft | Qt::AlignVCenter, "Image");
 }
 
 void TimeLine::updateVideoPositions() {
@@ -268,6 +282,14 @@ void TimeLine::updateVideoPositions() {
         qDebug() << "Film:" << video.getTitle() << "at x=" << video.getRect().left();
 
     update();
+}
+
+void TimeLine::drawSectionBackgrounds(QPainter &painter) {
+    painter.fillRect(QRect(0, 0, 60, lines[1]), QColor(230, 240, 255));
+
+    painter.fillRect(QRect(0, lines[1], 60, lines[2] - lines[1]), QColor(230, 255, 230));
+
+    painter.fillRect(QRect(0, lines[2], 60, height() - lines[2]), QColor(255, 240, 230));
 }
 
 void TimeLine::saveState() {
@@ -370,7 +392,7 @@ QList<VideoData> TimeLine::getVideoList() const {
 
 void TimeLine::setupIndicator() {
     indicator = new Indicator(this);
-    indicator->move(0, 0);
+    indicator->move(60, 0);
 }
 
 const VideoData *TimeLine::getCurrentIndicatorVideo() const {

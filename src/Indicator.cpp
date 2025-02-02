@@ -33,7 +33,7 @@ void Indicator::mouseMoveEvent(QMouseEvent *event)
     if (dragging)
     {
         qreal newX = x() + event->position().x() - dragStartPos.x();
-        newX = qMax(0.0, qMin(newX, static_cast<qreal>(parentWidget()->width() - width())));
+        newX = qMax(60.0, qMin(newX, static_cast<qreal>(parentWidget()->width() - width())));
         move(newX, y());
         qDebug() << "Indicator moved to: " << getPosition();
         emit parentWidget()->update();

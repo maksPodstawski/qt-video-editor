@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1276</width>
-    <height>669</height>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,7 @@
      <string notr="true"/>
     </property>
     <property name="segmentStyle">
-     <enum>QLCDNumber::Outline</enum>
+     <enum>QLCDNumber::SegmentStyle::Outline</enum>
     </property>
    </widget>
    <widget class="QPushButton" name="pauseButton">
@@ -124,10 +124,10 @@
      <string notr="true"/>
     </property>
     <property name="orientation">
-     <enum>Qt::Horizontal</enum>
+     <enum>Qt::Orientation::Horizontal</enum>
     </property>
     <property name="tickPosition">
-     <enum>QSlider::NoTicks</enum>
+     <enum>QSlider::TickPosition::NoTicks</enum>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBoxVideosTable">
@@ -149,7 +149,7 @@
       <x>20</x>
       <y>430</y>
       <width>1241</width>
-      <height>171</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -161,7 +161,7 @@
        <x>0</x>
        <y>0</y>
        <width>1239</width>
-       <height>169</height>
+       <height>219</height>
       </rect>
      </property>
     </widget>
@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>1276</width>
-     <height>21</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
