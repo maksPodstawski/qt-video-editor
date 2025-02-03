@@ -1,4 +1,7 @@
 #include "../include/mainwindow.h"
+
+#include <set>
+
 #include "../include/VideoCombiner.h"
 #include "../include/VideoTable.h"
 
@@ -64,7 +67,14 @@ MainWindow::MainWindow(QWidget *parent)
         updateDurationLabel();
     });
 
+    connect(videoTable, &VideoTable::playVideoRequested, videoPreviewWidget, &VideoPreview::playVideo);
+    connect(videoTable, &VideoTable::videoRemoved, timeLine, &TimeLine::removeVideoObjects);
 
+    connect(videoPreviewWidget, &VideoPreview::playPauseButtonTextChanged, this, [this](const QString &text) {
+        ui->playPauseButton->setText(text);
+    });
+
+    setupShortcuts();
 }
 
 MainWindow::~MainWindow()
@@ -72,33 +82,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::on_playButton_clicked()
+void MainWindow::on_playPauseButton_clicked()
 {
-    videoPreviewWidget->play();
-    ui->playButton->setEnabled(false);
-    ui->pauseButton->setEnabled(true);
-}
-
-
-void MainWindow::on_pauseButton_clicked()
-{
-    videoPreviewWidget->pause();
-    ui->pauseButton->setEnabled(false);
-    ui->playButton->setEnabled(true);
-}
-
-
-void MainWindow::on_actionOpen_triggered()
-{
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select video files"), "",
-        tr("Video and Audio Files (*.mp4 *.avi *.mov *.mp3 *.wav *.flac)"));
-    if (!fileNames.isEmpty()) {
-        QList<QString> videoFiles = fileNames.toVector().toList();
-        ui->pauseButton->setEnabled(false);
-        positionUpdateTimer->start(1000);
-
-        videoTable->updateTable(videoFiles);
+    if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PausedState) {
+        videoPreviewWidget->play();
+        ui->playPauseButton->setText("Pause");
+    } else {
+        videoPreviewWidget->pause();
+        ui->playPauseButton->setText("Play");
     }
 }
 
@@ -113,7 +104,6 @@ void MainWindow::on_volumeChangeSlider_valueChanged(int value)
         ui->muteButton->setText("Mute");
     }
 }
-
 
 void MainWindow::on_muteButton_clicked()
 {
@@ -143,8 +133,6 @@ void MainWindow::updateDurationLabel()
     }
 }
 
-
-
 void MainWindow::updateVideoTimeSlider() {
     if (videoPreviewWidget->getDuration() > 0) {
         qint64 currentPosition = videoPreviewWidget->getPosition();
@@ -152,6 +140,18 @@ void MainWindow::updateVideoTimeSlider() {
         int sliderPosition = (currentPosition * 100) / duration;
 
         ui->previewVideoTimeSlider->setValue(sliderPosition);
+    }
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select video files"), "",
+        tr("Video and Audio Files (*.mp4 *.avi *.mov *.mp3 *.wav *.flac)"));
+    if (!fileNames.isEmpty()) {
+        QList<QString> videoFiles = fileNames.toVector().toList();
+        positionUpdateTimer->start(1000);
+
+        videoTable->updateTable(videoFiles);
     }
 }
 
@@ -179,4 +179,41 @@ void MainWindow::on_actionExport_triggered()
     }
 }
 
+void MainWindow::setupShortcuts()
+{
+    QShortcut *muteShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_M), this);
+    connect(muteShortcut, &QShortcut::activated, this, &MainWindow::on_muteButton_clicked);
+
+    QShortcut *volumeUpShortcut = new QShortcut(QKeySequence(Qt::Key_Up), ui->volumeChangeSlider);
+    connect(volumeUpShortcut, &QShortcut::activated, this, [this]() {
+        int currentVolume = ui->volumeChangeSlider->value();
+        if (currentVolume < 100) {
+            ui->volumeChangeSlider->setValue(currentVolume + 5);
+        }
+    });
+
+    QShortcut *volumeDownShortcut = new QShortcut(QKeySequence(Qt::Key_Down), ui->volumeChangeSlider);
+    connect(volumeDownShortcut, &QShortcut::activated, this, [this]() {
+        int currentVolume = ui->volumeChangeSlider->value();
+        if (currentVolume > 0) {
+            ui->volumeChangeSlider->setValue(currentVolume - 5);
+        }
+    });
+
+    QShortcut *seekForwardShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    connect(seekForwardShortcut, &QShortcut::activated, this, [this]() {
+        qint64 currentPosition = videoPreviewWidget->getPosition();
+        videoPreviewWidget->setPosition(currentPosition + 5000);
+    });
+
+    QShortcut *seekBackwardShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    connect(seekBackwardShortcut, &QShortcut::activated, this, [this]() {
+        qint64 currentPosition = videoPreviewWidget->getPosition();
+        videoPreviewWidget->setPosition(currentPosition - 5000);
+    });
+
+    QShortcut *pauseShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+    connect(pauseShortcut, &QShortcut::activated, this, &MainWindow::on_playPauseButton_clicked);
+
+}
 

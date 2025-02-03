@@ -17,6 +17,8 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QStandardItemModel>
+#include <QHeaderView>
+#include <QShortcut>
 
 
 
@@ -28,6 +30,7 @@ public:
 
     void updateTable(const QList<QString> &mediaFiles);
 
+    void deleteSelectedVideo();
     static QString getDurationText(const QString &filePath);
     static QString getFileFormat(const QString &filePath);
 
@@ -45,6 +48,14 @@ private:
     void setUpTableWidget();
     void startDrag(const QPoint &pos);
     void showContextMenu(const QPoint &pos);
+    void setupShortcuts();
+    void showFileInfo();
+    void playSelectedVideo();
+
+    signals:
+    void playVideoRequested(const QString &filePath);
+    void videoRemoved(const QString &filePath);
+
 };
 
 #endif // VIDEOTABLE_H

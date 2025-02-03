@@ -39,10 +39,8 @@ private slots:
     void on_actionOpen_triggered();
     void on_muteButton_clicked();
     void on_volumeChangeSlider_valueChanged(int value);
-    void on_playButton_clicked();
-    void on_pauseButton_clicked();
+    void on_playPauseButton_clicked();
     void on_actionExport_triggered();
-
 
 private:
     Ui::MainWindow *ui;
@@ -58,5 +56,6 @@ private:
 
     void updateVideoTimeSlider();
     void updateDurationLabel();
+    void setupShortcuts();
 };
 #endif // MAINWINDOW_H

@@ -30,10 +30,9 @@ public:
 
     void saveState();
     void undoState();
-    Indicator *indicator;
-    double getTimePerUnit();
-    const VideoData* getCurrentIndicatorVideo() const;
-    const int getCurrentVideoIndexIndicator() const;
+
+public slots:
+    void removeVideoObjects(const QString &filePath);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -55,12 +54,11 @@ private:
     VideoData *draggingVideo;
     QPoint dragStartPos;
 
-    const int LINE_HEIGHT = 60;
+    Indicator *indicator;
+
+    const int LINE_HEIGHT = 30;
 
     int findNearestLine(int y);
-
-    void drawContentLabels(QPainter &painter);
-
     void drawVideos(QPainter &painter);
     void drawLines(QPainter &painter);
     void drawTextOnVideos(QPainter &painter);
@@ -69,32 +67,34 @@ private:
     void moveDraggingVideo(const QPoint &pos);
     void scaleVideos(double factor);
     void updateVideoPositions();
-
-    void drawSectionBackgrounds(QPainter &painter);
-
     void setupShortcuts();
+    void copySelectedVideo();
+    void pasteCopiedVideo();
+    void cutSelectedVideo();
+    void deleteSelectedVideo();
+    void cutVideo(QList<VideoData>::iterator i);
+
     void trimVideoAtIndicator();
     void cutLeftVideoAtIndicator();
-    void splitVideoAtIndicator();
 
     Caretaker caretaker;
     Originator originator;
     int currentStateIndex;
-    QShortcut *undoShortcut;
+
 
 
     std::optional<VideoData> copiedVideo;
-    std::optional<VideoData> cutVideo;
+
     bool cutInProgress = false;
 
     void setupIndicator();
 
-
+    const VideoData* getCurrentIndicatorVideo() const;
 
     QTime getVideoDurationTime();
     int getVideoDurationWidth();
 
-
+    double getTimePerUnit();
     double calculateTimeFromVideoStart(const VideoData &video, int x);
 
 };

@@ -9,8 +9,6 @@
 #include <QVBoxLayout>
 #include <QAudioOutput>
 #include <QMimeData>
-#include "CutLeftOperation.h"
-#include "CutRightOperation.h"
 
 
 class VideoPreview : public QWidget
@@ -18,10 +16,6 @@ class VideoPreview : public QWidget
     Q_OBJECT
 public:
     explicit VideoPreview(TimeLine *timeLine, QWidget *parent = nullptr);
-
-    void updateIndicatorPosition(qint64 position);
-
-    void moveIndicator();
 
     void play();
     void pause();
@@ -32,21 +26,25 @@ public:
     float getVolume() const;
     qint64 getDuration();
     qint64 getPosition();
-    TimeLine *timeLine;
+    QMediaPlayer::PlaybackState getPlaybackState() const;
 
+    signals:
+    void playVideoRequested(const QString &filePath);
+    void playPauseButtonTextChanged(const QString &text);
+
+    public slots:
+        void playVideo(const QString &filePath);
 
 private:
     QMediaPlayer *mediaPlayer;
     QVideoWidget *videoWidget;
     QAudioOutput *audioOutput;
-    void determineStartEndTimes(const VideoData &videoData, qreal &startTime, qreal &endTime);
-    QList<QTimer*> indicatorTimers;
+    TimeLine *timeLine;
     int currentVideoIndex;
 
-    qint64 m_iVideoPosition;
+    private slots:
 
-private slots:
-    void playNextVideo();
+        void playNextVideo();
     void updatePlayer();
 };
 

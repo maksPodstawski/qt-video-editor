@@ -10,6 +10,7 @@ VideoTable::VideoTable(QWidget *parent)
     setLayout(layout);
 
     connect(tableView, &QTableView::customContextMenuRequested, this, &VideoTable::showContextMenu);
+    setupShortcuts();
 }
 
 void VideoTable::setUpTableWidget()
@@ -24,6 +25,11 @@ void VideoTable::setUpTableWidget()
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->setDragDropMode(QAbstractItemView::DragOnly);
     tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    tableView->hideColumn(3);
+    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+
 }
 
 void VideoTable::updateTable(const QList<QString> &mediaFiles)
@@ -150,26 +156,88 @@ void VideoTable::showContextMenu(const QPoint& pos)
     }
 
     QMenu contextMenu(this);
-    QAction *showFileInfo = contextMenu.addAction("Show File Info");
+    QAction *showFileInfoAction = contextMenu.addAction("Show File Info");
+    showFileInfoAction->setShortcut(QKeySequence("Alt+Enter"));
+    showFileInfoAction->setShortcutVisibleInContextMenu(true);
+
+    QAction *playVideo = contextMenu.addAction("Play");
+    playVideo->setShortcut(QKeySequence("Enter"));
+    playVideo->setShortcutVisibleInContextMenu(true);
+
     QAction *removeVideo = contextMenu.addAction("Remove Video");
+
     QAction *selectedAction = contextMenu.exec(tableView->viewport()->mapToGlobal(pos));
 
-    if (selectedAction == showFileInfo) {
-        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
-        QFileInfo fileInfo(filePath);
-        QString title = fileInfo.baseName();
-        QString durationText = getDurationText(filePath);
-        QString format = fileInfo.suffix().toUpper();
-
-        QString message = QString("Title: %1\nDuration: %2\nFormat: %3\nPath: %4")
-                         .arg(title)
-                         .arg(durationText)
-                         .arg(format)
-                         .arg(filePath);
-
-        QMessageBox::information(this, "File Info", message);
+    if (selectedAction == showFileInfoAction) {
+        showFileInfo();
     }
     else if (selectedAction == removeVideo) {
+        deleteSelectedVideo();
+    }
+    else if (selectedAction == playVideo) {
+        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
+        emit playVideoRequested(filePath);
+    }
+}
+
+void VideoTable::setupShortcuts()
+{
+    QShortcut *showFileInfoShortcut = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Return), this);
+    connect(showFileInfoShortcut, &QShortcut::activated, this, &VideoTable::showFileInfo);
+
+    QShortcut *playVideoShorcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    connect(playVideoShorcut, &QShortcut::activated, this, &VideoTable::playSelectedVideo);
+}
+
+void VideoTable::playSelectedVideo()
+{
+    QModelIndexList selectedRows = tableView->selectionModel()->selectedRows();
+    for (const QModelIndex &index : selectedRows) {
+        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
+        emit playVideoRequested(filePath);
+    }
+}
+
+
+void VideoTable::deleteSelectedVideo() {
+    QModelIndexList selectedRows = tableView->selectionModel()->selectedRows();
+    for (const QModelIndex &index : selectedRows) {
+        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
+        emit videoRemoved(filePath);
         tableModel->removeRow(index.row());
     }
+}
+
+void VideoTable::showFileInfo()
+{
+    QModelIndexList selectedIndexes = tableView->selectionModel()->selectedIndexes();
+    if (selectedIndexes.isEmpty()) {
+        return;
+    }
+
+    QModelIndex index = selectedIndexes.first();
+    QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
+    QFileInfo fileInfo(filePath);
+    QString title = fileInfo.baseName();
+    QString durationText = getDurationText(filePath);
+    QString format = fileInfo.suffix().toUpper();
+    qint64 fileSize = fileInfo.size();
+    QString fileSizeText;
+
+    if (fileSize < 1024 * 1024) {
+        fileSizeText = QString::number(fileSize / 1024.0, 'f', 2) + " KB";
+    } else if (fileSize < 1024 * 1024 * 1024) {
+        fileSizeText = QString::number(fileSize / (1024.0 * 1024.0), 'f', 2) + " MB";
+    } else {
+        fileSizeText = QString::number(fileSize / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
+    }
+
+    QString message = QString("Title: %1\nDuration: %2\nFormat: %3\nPath: %4\nSize: %5")
+                     .arg(title)
+                     .arg(durationText)
+                     .arg(format)
+                     .arg(filePath)
+                     .arg(fileSizeText);
+
+    QMessageBox::information(this, "File Info", message);
 }
