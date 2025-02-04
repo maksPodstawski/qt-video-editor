@@ -32,7 +32,16 @@ public:
     float getVolume() const;
     qint64 getDuration();
     qint64 getPosition();
+    QMediaPlayer::PlaybackState getPlaybackState() const;
+
     TimeLine *timeLine;
+
+    signals:
+    void playVideoRequested(const QString &filePath);
+    void playPauseButtonTextChanged(const QString &text);
+
+public slots:
+    void playVideo(const QString &filePath);
 
 
 private:

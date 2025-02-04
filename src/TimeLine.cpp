@@ -146,10 +146,12 @@ VideoData TimeLine::extractVideoData(const QMimeData *mimeData) {
         QMap<int, QVariant> valueMap;
         stream >> row >> col >> valueMap;
 
-        if (col == 0) filePath = valueMap.value(Qt::UserRole).toString();
+        if (col == 0) {
+            filePath = valueMap.value(Qt::UserRole).toString();
+            title = QFileInfo(filePath).baseName();
+        }
         else if (col == 1) duration = valueMap.value(Qt::DisplayRole).toString();
         else if (col == 2) format = valueMap.value(Qt::DisplayRole).toString();
-        else if (col == 3) title = QFileInfo(valueMap.value(Qt::DisplayRole).toString()).baseName();
     }
 
     return VideoData(title, duration, filePath, format, QRect());
@@ -324,28 +326,118 @@ void TimeLine::undoState() {
     }
 }
 
-void TimeLine::setupShortcuts() {
-    undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+void TimeLine::setupShortcuts()
+{
+    QShortcut *undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
     connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
 
+    QShortcut *copyShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    connect(copyShortcut, &QShortcut::activated, this, &TimeLine::copySelectedVideo);
+
+    QShortcut *pasteShortcut = new QShortcut(QKeySequence("Ctrl+V"), this);
+    connect(pasteShortcut, &QShortcut::activated, this, &TimeLine::pasteCopiedVideo);
+
+    QShortcut *cutShortcut = new QShortcut(QKeySequence("Ctrl+X"), this);
+    connect(cutShortcut, &QShortcut::activated, this, &TimeLine::cutSelectedVideo);
+
+    QShortcut *deleteShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+    connect(deleteShortcut, &QShortcut::activated, this, &TimeLine::deleteSelectedVideo);
+}
+
+void TimeLine::copySelectedVideo() {
+    QPoint cursorPos = mapFromGlobal(QCursor::pos());
+    for (const VideoData &video : videoList) {
+        if (video.getRect().contains(cursorPos)) {
+            copiedVideo = video;
+            cutInProgress = false;
+            qDebug() << "Video copied: " << copiedVideo->getTitle();
+            return;
+        }
+    }
+    qDebug() << "No video under cursor to copy.";
+}
+
+void TimeLine::pasteCopiedVideo() {
+    if (copiedVideo.has_value()) {
+        VideoData newVideo = copiedVideo.value();
+        QRect newRect = newVideo.getRect();
+
+        QPoint newPosition = mapFromGlobal(QCursor::pos());
+
+        int snappedY = findNearestLine(newPosition.y());
+        newRect.moveTo(newPosition.x(), snappedY);
+        newVideo.setRect(newRect);
+
+        videoList.push_back(newVideo);
+
+        saveState();
+        update();
+
+        if (cutInProgress) {
+            copiedVideo.reset();
+            cutInProgress = false;
+        }
+    }
+}
+
+void TimeLine::cutSelectedVideo() {
+    QPoint cursorPos = mapFromGlobal(QCursor::pos());
+    for (auto it = videoList.begin(); it != videoList.end(); ++it) {
+        if (it->getRect().contains(cursorPos)) {
+            cutVideo(it);
+            saveState();
+            update();
+            return;
+        }
+    }
+    qDebug() << "No video under cursor to cut.";
+}
+
+void TimeLine::deleteSelectedVideo() {
+    QPoint cursorPos = mapFromGlobal(QCursor::pos());
+    for (auto it = videoList.begin(); it != videoList.end(); ++it) {
+        if (it->getRect().contains(cursorPos)) {
+            qDebug() << "Video deleted: " << it->getTitle();
+            videoList.erase(it);
+            saveState();
+            update();
+            return;
+        }
+    }
+    qDebug() << "No video under cursor to delete.";
+}
+
+void TimeLine::cutVideo(QList<VideoData>::iterator i) {
+    copiedVideo = *i;
+    cutInProgress = true;
+    videoList.erase(i);
 }
 
 void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
-    for (auto i = videoList.begin(); i != videoList.end(); i++) {
+    for (auto i = videoList.begin(); i != videoList.end(); i++)
+    {
         if (i->getRect().contains(event->pos())) {
             QMenu contextMenu(this);
-            QAction * copyAction = contextMenu.addAction("Copy");
-            QAction * cutAction = contextMenu.addAction("Cut");
-            QAction * deleteAction = contextMenu.addAction("Delete");
-            QAction * selectedAction = contextMenu.exec(event->globalPos());
+
+            QAction *copyAction = contextMenu.addAction("Copy");
+            copyAction->setShortcut(QKeySequence("Ctrl+C"));
+            copyAction->setShortcutVisibleInContextMenu(true);
+
+            QAction *cutAction = contextMenu.addAction("Cut");
+            cutAction->setShortcut(QKeySequence("Ctrl+X"));
+            cutAction->setShortcutVisibleInContextMenu(true);
+
+            QAction *deleteAction = contextMenu.addAction("Delete");
+            deleteAction->setShortcut(QKeySequence("Del"));
+            deleteAction->setShortcutVisibleInContextMenu(true);
+
+            QAction *selectedAction = contextMenu.exec(event->globalPos());
 
             if (selectedAction == copyAction) {
                 copiedVideo = *i;
                 qDebug() << "Video copied: " << copiedVideo->getTitle();
             } else if (selectedAction == cutAction) {
-                copiedVideo = *i;
-                cutInProgress = true;
-                videoList.erase(i);
+                cutVideo(i);
                 saveState();
                 update();
             } else if (selectedAction == deleteAction) {
@@ -359,32 +451,28 @@ void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
 
     if (copiedVideo.has_value()) {
         QMenu contextMenu(this);
-        QAction * pasteAction = contextMenu.addAction("Paste");
-        QAction * selectedAction = contextMenu.exec(event->globalPos());
+        QAction *pasteAction = contextMenu.addAction("Paste");
+        pasteAction->setShortcut(QKeySequence("Ctrl+V"));
+        pasteAction->setShortcutVisibleInContextMenu(true);
+        QAction *selectedAction = contextMenu.exec(event->globalPos());
 
         if (selectedAction == pasteAction) {
-            VideoData newVideo = copiedVideo.value();
-            QRect newRect = newVideo.getRect();
-
-            QPoint newPosition = event->pos();
-
-            int snappedY = findNearestLine(newPosition.y());
-            newRect.moveTo(newPosition.x(), snappedY);
-            newVideo.setRect(newRect);
-
-            videoList.push_back(newVideo);
-
-            if (cutInProgress) {
-                copiedVideo.reset();
-                cutInProgress = false;
-            }
-
-            saveState();
-            update();
+            pasteCopiedVideo();
         }
     }
 }
 
+void TimeLine::removeVideoObjects(const QString &filePath) {
+    for (auto it = videoList.begin(); it != videoList.end(); ) {
+        if (it->getFilePath() == filePath) {
+            it = videoList.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    saveState();
+    update();
+}
 
 QList<VideoData> TimeLine::getVideoList() const {
     return this->videoList;

@@ -97,13 +97,16 @@ void VideoPreview::setPosition(qint64 position) {
     mediaPlayer->setPosition(position);
 }
 
-
 qint64 VideoPreview::getDuration() {
     return mediaPlayer->duration();
 }
 
 qint64 VideoPreview::getPosition() {
     return mediaPlayer->position();
+}
+
+QMediaPlayer::PlaybackState VideoPreview::getPlaybackState() const {
+    return mediaPlayer->playbackState();
 }
 
 void VideoPreview::setVolume(float volume) {
@@ -170,6 +173,12 @@ void VideoPreview::playNextVideo() {
         qDebug() << "Restarting playlist from the beginning.";
         updatePlayer();
     }
+}
+
+void VideoPreview::playVideo(const QString &filePath) {
+    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    mediaPlayer->play();
+    emit playPauseButtonTextChanged("Pause");
 }
 
 

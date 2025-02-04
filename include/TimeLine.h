@@ -30,10 +30,15 @@ public:
 
     void saveState();
     void undoState();
+
     Indicator *indicator;
     double getTimePerUnit();
     const VideoData* getCurrentIndicatorVideo() const;
     const int getCurrentVideoIndexIndicator() const;
+
+
+public slots:
+    void removeVideoObjects(const QString &filePath);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -73,6 +78,12 @@ private:
     void drawSectionBackgrounds(QPainter &painter);
 
     void setupShortcuts();
+    void copySelectedVideo();
+    void pasteCopiedVideo();
+    void cutSelectedVideo();
+    void deleteSelectedVideo();
+    void cutVideo(QList<VideoData>::iterator i);
+
     void trimVideoAtIndicator();
     void cutLeftVideoAtIndicator();
     void splitVideoAtIndicator();
@@ -84,12 +95,10 @@ private:
 
 
     std::optional<VideoData> copiedVideo;
-    std::optional<VideoData> cutVideo;
+
     bool cutInProgress = false;
 
     void setupIndicator();
-
-
 
     QTime getVideoDurationTime();
     int getVideoDurationWidth();
