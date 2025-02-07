@@ -21,12 +21,15 @@
 #include <QMenu>
 #include <QSlider>
 
+#include "TextData.h"
+
 class TimeLine : public QWidget
 {
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
     QList<VideoData> getVideoList() const;
+    QList<TextData> getTextList() const;
 
     void saveState();
     void undoState();
@@ -56,6 +59,9 @@ private:
 
     QList<int> lines;
     QList<VideoData> videoList;
+    QList<TextData> textList;
+    TextData* draggingText;
+
     double scaleFactor;
     VideoData *draggingVideo;
     QPoint dragStartPos;
@@ -65,7 +71,8 @@ private:
     int findNearestLine(int y);
 
     void drawContentLabels(QPainter &painter);
-
+    void drawTextItems(QPainter &painter);
+    void showAddTextDialog(const QPoint &clickPosition);
     void drawVideos(QPainter &painter);
     void drawLines(QPainter &painter);
     void drawTextOnVideos(QPainter &painter);
@@ -74,6 +81,7 @@ private:
     void moveDraggingVideo(const QPoint &pos);
     void scaleVideos(double factor);
     void updateVideoPositions();
+    void moveDraggingText(const QPoint &pos);
 
     void drawSectionBackgrounds(QPainter &painter);
 

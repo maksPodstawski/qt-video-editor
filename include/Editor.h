@@ -8,13 +8,15 @@
 
 #include <QString>
 #include "VideoData.h"
+#include "TextData.h"
 
 class Editor {
 public:
     static bool trimVideo(const QString &inputFile, const QString &outputFile ,double startTime);
     static bool cutVideo(const QString &inputFile, const QString &outputFile, double cutTime);
     static bool normalizeVideo(const QString &inputFile, const QString &outputFile, const QString &resolution, int frameRate, const QString &videoCodec, const QString &audioCodec, int audioRate, int audioChannels);
-    static bool combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile);
+    static bool combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile, const QList<TextData> &textList);
+    static bool addTextToVideo(const QString &inputFile, const QString &outputFile, const QList<TextData> &textList);
 };
 
 

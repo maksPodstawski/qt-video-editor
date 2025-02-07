@@ -2,6 +2,8 @@
 #include "../include/VideoPerview.h"
 #include "../include/CutRightOperation.h"
 #include "../include/CutLeftOperation.h"
+#include "../include/AddTextDialog.h"
+#include "../include/TextData.h"
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
@@ -62,6 +64,7 @@ void TimeLine::paintEvent(QPaintEvent *event) {
     drawContentLabels(painter);
     drawLines(painter);
     drawVideos(painter);
+    drawTextItems(painter);
     drawTextOnVideos(painter);
 
     painter.setPen(QPen(Qt::red, 2));
@@ -184,11 +187,22 @@ void TimeLine::mousePressEvent(QMouseEvent *event) {
             break;
         }
     }
+    for (TextData &text: textList) {
+        if (text.getRect().contains(event->pos())) {
+            draggingText = &text;
+            dragStartPos = event->pos() - text.getRect().topLeft();
+            qDebug() << "Started dragging text:" << text.getText();
+            return;
+        }
+    }
 }
 
 void TimeLine::mouseMoveEvent(QMouseEvent *event) {
     if (draggingVideo) {
         moveDraggingVideo(event->pos());
+        update();
+    }else if (draggingText) {
+        moveDraggingText(event->pos());
         update();
     }
 }
@@ -222,6 +236,11 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event) {
         updateVideoPositions();
         draggingVideo = nullptr;
         qDebug() << "Film released at position: " << rect;
+        saveState();
+        update();
+    }
+    else if (draggingText) {
+        draggingText = nullptr;
         saveState();
         update();
     }
@@ -274,6 +293,34 @@ void TimeLine::drawContentLabels(QPainter &painter) {
     painter.drawText(imageLabelRect, Qt::AlignLeft | Qt::AlignVCenter, "Image");
 }
 
+void TimeLine::drawTextItems(QPainter &painter) {
+    painter.setPen(QPen(Qt::black));
+    for (const TextData &text : textList) {
+        QRect textRect = text.getRect();
+        painter.setBrush(QBrush(Qt::yellow)); // Optional: Set a background color for text blocks
+        painter.drawRect(textRect);
+        painter.setFont(text.getFont());
+        painter.drawText(textRect, Qt::AlignCenter, text.getText());
+    }
+}
+
+void TimeLine::showAddTextDialog(const QPoint &clickPosition) {
+    AddTextDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        QString text = dialog.getText();
+        QPoint position = dialog.getPosition();
+        int fontSize = dialog.getFontSize();
+        QFont font = dialog.getFont();
+
+        QRect textRect(clickPosition, QSize(100, LINE_HEIGHT));
+        TextData textData(text, font, fontSize, textRect, position.x(), position.y());
+
+        textList.append(textData);
+        saveState();
+        update();
+    }
+}
+
 void TimeLine::updateVideoPositions() {
     std::sort(videoList.begin(), videoList.end(), [](const VideoData &a, const VideoData &b) {
         return a.getRect().left() < b.getRect().left();
@@ -284,6 +331,25 @@ void TimeLine::updateVideoPositions() {
         qDebug() << "Film:" << video.getTitle() << "at x=" << video.getRect().left();
 
     update();
+}
+
+void TimeLine::moveDraggingText(const QPoint &pos) {
+    QRect rect = draggingText->getRect();
+    QPoint newPosition = pos - dragStartPos;
+
+    int adjustedX = qBound(60, newPosition.x(), width() - rect.width());
+    int adjustedY = qBound(lines[0], findNearestLine(newPosition.y()), lines.last() - rect.height());
+
+    rect.moveTopLeft(QPoint(adjustedX, adjustedY));
+
+    for (const TextData &text: textList) {
+        if (text.getRect() != draggingText->getRect() && text.getRect().intersects(rect)) {
+            return;
+        }
+    }
+
+    draggingText->setRect(rect);
+    qDebug() << "Dragging text " << draggingText->getText() << " to position: " << rect;
 }
 
 void TimeLine::drawSectionBackgrounds(QPainter &painter) {
@@ -414,11 +480,15 @@ void TimeLine::cutVideo(QList<VideoData>::iterator i) {
 }
 
 void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
-    for (auto i = videoList.begin(); i != videoList.end(); i++)
-    {
-        if (i->getRect().contains(event->pos())) {
-            QMenu contextMenu(this);
+    QMenu contextMenu(this);
 
+    QAction *addTextAction = contextMenu.addAction("Add Text");
+    addTextAction->setShortcutVisibleInContextMenu(true);
+
+    QAction *selectedAction = nullptr;
+
+    for (auto i = videoList.begin(); i != videoList.end(); i++) {
+        if (i->getRect().contains(event->pos())) {
             QAction *copyAction = contextMenu.addAction("Copy");
             copyAction->setShortcut(QKeySequence("Ctrl+C"));
             copyAction->setShortcutVisibleInContextMenu(true);
@@ -431,7 +501,7 @@ void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
             deleteAction->setShortcut(QKeySequence("Del"));
             deleteAction->setShortcutVisibleInContextMenu(true);
 
-            QAction *selectedAction = contextMenu.exec(event->globalPos());
+            selectedAction = contextMenu.exec(event->globalPos());
 
             if (selectedAction == copyAction) {
                 copiedVideo = *i;
@@ -444,17 +514,23 @@ void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
                 videoList.erase(i);
                 saveState();
                 update();
+            } else if (selectedAction == addTextAction) {
+                showAddTextDialog(event->pos());
             }
             return;
         }
     }
 
-    if (copiedVideo.has_value()) {
-        QMenu contextMenu(this);
+    if (!selectedAction) {
+        selectedAction = contextMenu.exec(event->globalPos());
+    }
+
+    if (selectedAction == addTextAction) {
+        showAddTextDialog(event->pos());
+    } else if (selectedAction && copiedVideo.has_value()) {
         QAction *pasteAction = contextMenu.addAction("Paste");
         pasteAction->setShortcut(QKeySequence("Ctrl+V"));
         pasteAction->setShortcutVisibleInContextMenu(true);
-        QAction *selectedAction = contextMenu.exec(event->globalPos());
 
         if (selectedAction == pasteAction) {
             pasteCopiedVideo();
@@ -476,6 +552,10 @@ void TimeLine::removeVideoObjects(const QString &filePath) {
 
 QList<VideoData> TimeLine::getVideoList() const {
     return this->videoList;
+}
+
+QList<TextData> TimeLine::getTextList() const {
+    return this->textList;
 }
 
 void TimeLine::setupIndicator() {
