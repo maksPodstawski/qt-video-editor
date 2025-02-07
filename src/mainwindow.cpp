@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     , videoTable(new VideoTable(this))
     , timeLine(new TimeLine(this))
     , editor(new Editor)
+    , isPlayingFromVideoTable(false)
 {
     ui->setupUi(this);
 
@@ -64,14 +65,18 @@ MainWindow::MainWindow(QWidget *parent)
         updateDurationLabel();
     });
 
-    connect(videoTable, &VideoTable::playVideoRequested, videoPreviewWidget, &VideoPreview::playVideo);
     connect(videoTable, &VideoTable::videoRemoved, timeLine, &TimeLine::removeVideoObjects);
+
+    setupShortcuts();
+
+    connect(videoTable, &VideoTable::playVideoRequested, this, [this](const QString &filePath) {
+    isPlayingFromVideoTable = true;
+    videoPreviewWidget->playVideo(filePath);
+    });
 
     connect(videoPreviewWidget, &VideoPreview::playPauseButtonTextChanged, this, [this](const QString &text) {
         ui->playPauseButton->setText(text);
     });
-
-    setupShortcuts();
 }
 
 MainWindow::~MainWindow()
@@ -79,15 +84,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::on_playPauseButton_clicked()
 {
-    if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PausedState) {
-        videoPreviewWidget->play();
-        ui->playPauseButton->setText("Pause");
-    } else {
+    if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PlayingState) {
         videoPreviewWidget->pause();
         ui->playPauseButton->setText("Play");
+    } else {
+        videoPreviewWidget->play();
+        ui->playPauseButton->setText("Pause");
     }
 }
 
@@ -215,5 +219,4 @@ void MainWindow::setupShortcuts()
     connect(pauseShortcut, &QShortcut::activated, this, &MainWindow::on_playPauseButton_clicked);
 
 }
-
 

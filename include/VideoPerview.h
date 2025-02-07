@@ -19,40 +19,41 @@ class VideoPreview : public QWidget
 public:
     explicit VideoPreview(TimeLine *timeLine, QWidget *parent = nullptr);
 
-    void updateIndicatorPosition(qint64 position);
+    TimeLine *timeLine;
 
+    void updateIndicatorPosition(qint64 position);
     void moveIndicator();
 
     void play();
     void pause();
     void stop();
+
     void setPosition(qint64 position);
     void setVolume(float volume);
     void setVideoFiles(const QList<QString> &files);
+
     float getVolume() const;
     qint64 getDuration();
     qint64 getPosition();
     QMediaPlayer::PlaybackState getPlaybackState() const;
+    QMediaPlayer* getMediaPlayer() const;
 
-    TimeLine *timeLine;
-
-    signals:
-    void playVideoRequested(const QString &filePath);
-    void playPauseButtonTextChanged(const QString &text);
-
-public slots:
     void playVideo(const QString &filePath);
 
+    signals:
+    void playPauseButtonTextChanged(const QString &text);
 
 private:
     QMediaPlayer *mediaPlayer;
     QVideoWidget *videoWidget;
     QAudioOutput *audioOutput;
-    void determineStartEndTimes(const VideoData &videoData, qreal &startTime, qreal &endTime);
     QList<QTimer*> indicatorTimers;
+    void determineStartEndTimes(const VideoData &videoData, qreal &startTime, qreal &endTime);
     int currentVideoIndex;
 
     qint64 m_iVideoPosition;
+    qint64 pausedPosition;
+
 
 private slots:
     void playNextVideo();

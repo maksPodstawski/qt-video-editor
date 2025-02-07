@@ -34,14 +34,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private slots:
 
     void on_actionOpen_triggered();
     void on_muteButton_clicked();
     void on_volumeChangeSlider_valueChanged(int value);
-    void on_playPauseButton_clicked();
     void on_actionExport_triggered();
+    //void on_playButton_clicked();
+    //void on_pauseButton_clicked();
 
+    void on_playPauseButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -52,6 +55,7 @@ private:
     QTimer *positionUpdateTimer;
     Editor *editor;
 
+    bool isPlayingFromVideoTable;
     bool isSliderBeingMoved = false;
     float previousVolume;
 

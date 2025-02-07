@@ -11,7 +11,8 @@ VideoPreview::VideoPreview(TimeLine *timeLine, QWidget *parent)
       audioOutput(new QAudioOutput(this)),
       timeLine(timeLine),
       currentVideoIndex(0),
-      m_iVideoPosition(0) {
+      m_iVideoPosition(0),
+      pausedPosition(0)  {
     mediaPlayer->setVideoOutput(videoWidget);
     mediaPlayer->setAudioOutput(audioOutput);
 
@@ -27,6 +28,7 @@ VideoPreview::VideoPreview(TimeLine *timeLine, QWidget *parent)
         }
     });
 }
+
 
 void VideoPreview::updateIndicatorPosition(qint64 position) {
     const auto &videoList = timeLine->getVideoList();
@@ -60,29 +62,44 @@ void VideoPreview::updateIndicatorPosition(qint64 position) {
     timeLine->update();
 }
 
-
 void VideoPreview::play() {
     const auto &videoList = timeLine->getVideoList();
+
     if (videoList.isEmpty()) {
         qWarning() << "No videos to play.";
         return;
     }
 
-    currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
-    updatePlayer();
+    if (mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+        return;
+    }
 
-    int indicatorX = timeLine->indicator->x();
-    const VideoData &currentVideo = videoList[currentVideoIndex];
-    int startX = currentVideo.getRect().left();
-    double timePerUnit = timeLine->getTimePerUnit();
+    if (pausedPosition > 0) {
+        mediaPlayer->setPosition(pausedPosition);
+        pausedPosition = 0;
+    } else {
+        currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
+        updatePlayer();
 
-    qreal startTime, endTime;
-    determineStartEndTimes(currentVideo, startTime, endTime);
+        int indicatorX = timeLine->indicator->x();
+        const VideoData &currentVideo = videoList[currentVideoIndex];
+        int startX = currentVideo.getRect().left();
+        double timePerUnit = timeLine->getTimePerUnit();
 
-    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
-    mediaPlayer->setPosition(newPosition);
+        qreal startTime, endTime;
+        determineStartEndTimes(currentVideo, startTime, endTime);
+
+        qint64 newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+        mediaPlayer->setPosition(newPosition);
+    }
 
     mediaPlayer->play();
+}
+
+void VideoPreview::playVideo(const QString &filePath) {
+    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    mediaPlayer->play();
+
 }
 
 void VideoPreview::stop() {
@@ -90,6 +107,7 @@ void VideoPreview::stop() {
 }
 
 void VideoPreview::pause() {
+    pausedPosition = mediaPlayer->position();
     mediaPlayer->pause();
 }
 
@@ -107,6 +125,10 @@ qint64 VideoPreview::getPosition() {
 
 QMediaPlayer::PlaybackState VideoPreview::getPlaybackState() const {
     return mediaPlayer->playbackState();
+}
+
+QMediaPlayer* VideoPreview::getMediaPlayer() const {
+    return mediaPlayer;
 }
 
 void VideoPreview::setVolume(float volume) {
@@ -129,32 +151,18 @@ void VideoPreview::updatePlayer() {
 
     qreal startTime, endTime;
     determineStartEndTimes(currentVideo, startTime, endTime);
-    m_iVideoPosition = static_cast<qint64>(startTime);
+    mediaPlayer->setPosition(startTime * 1000);
 
     disconnect(mediaPlayer, &QMediaPlayer::positionChanged, nullptr, nullptr);
-    disconnect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, nullptr, nullptr);
 
     connect(mediaPlayer, &QMediaPlayer::positionChanged, this, [this](qint64 position) {
-        updateIndicatorPosition(position);
-    });
-
-    connect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-            if (status == QMediaPlayer::EndOfMedia) {
-                qDebug() << "End of media reached for video index:" << currentVideoIndex;
-                playNextVideo();
-            }
-        });
-
-    connect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-        if (status == QMediaPlayer::BufferedMedia) {
-            qDebug() << "BufferedMedia status reached. Setting position to:" << m_iVideoPosition;
-            mediaPlayer->setPosition(m_iVideoPosition);
-        }
-    });
+                updateIndicatorPosition(position);
+            });
 
     connect(mediaPlayer, &QMediaPlayer::positionChanged, this, [this, endTime](qint64 position) {
+        qint64 endTimeMs = endTime * 1000;
         qDebug() << "END TIME:" << endTime;
-        if (endTime != -1 && position >= static_cast<qint64>(endTime)) {
+        if (endTime != -1 && position >= endTimeMs) {
             qDebug() << "Video ended at:" << position;
             mediaPlayer->stop();
             playNextVideo();
@@ -170,25 +178,20 @@ void VideoPreview::playNextVideo() {
         mediaPlayer->play();
     } else {
         currentVideoIndex = 0;
-        qDebug() << "Restarting playlist from the beginning.";
-        updatePlayer();
     }
 }
-
-void VideoPreview::playVideo(const QString &filePath) {
-    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-    mediaPlayer->play();
-    emit playPauseButtonTextChanged("Pause");
-}
-
 
 void VideoPreview::determineStartEndTimes(const VideoData &videoData, qreal &startTime, qreal &endTime) {
     startTime = 0;
     endTime = -1;
 
-    startTime = videoData.getStartTime();
-    endTime = videoData.getEndTime();
+    for (const auto &operation : videoData.getOperations()) {
+        if (auto cutLeftOp = dynamic_cast<CutLeftOperation*>(operation)) {
+            startTime = cutLeftOp->getOperationTime();
+        } else if (auto cutRightOp = dynamic_cast<CutRightOperation*>(operation)) {
+            endTime = cutRightOp->getOperationTime();
+        }
+    }
 
-    qDebug() << "Determining start and end times for video:" << videoData.getTitle() << "Start:" << startTime << "End:"
-            << endTime;
+    qDebug() << "Determining start and end times for video:" << videoData.getTitle() << "Start:" << startTime << "End:" << endTime;
 }

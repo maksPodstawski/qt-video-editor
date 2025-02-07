@@ -34,7 +34,6 @@ public:
     QWidget *centralwidget;
     QGroupBox *groupBoxVideo;
     QSlider *volumeChangeSlider;
-    QPushButton *playPauseButton;
     QPushButton *muteButton;
     QLCDNumber *volumeLCD;
     QLabel *timeLabel;
@@ -42,6 +41,7 @@ public:
     QGroupBox *groupBoxVideosTable;
     QScrollArea *timeLineScrollArea;
     QWidget *scrollAreaWidgetContents;
+    QPushButton *playPauseButton;
     QMenuBar *menubar;
     QMenu *menuFile;
     QStatusBar *statusbar;
@@ -63,9 +63,6 @@ public:
         volumeChangeSlider = new QSlider(centralwidget);
         volumeChangeSlider->setObjectName("volumeChangeSlider");
         volumeChangeSlider->setGeometry(QRect(1150, 200, 16, 160));
-        playPauseButton = new QPushButton(centralwidget);
-        playPauseButton->setObjectName("playPauseButton");
-        playPauseButton->setGeometry(QRect(1150, 130, 80, 24));
         muteButton = new QPushButton(centralwidget);
         muteButton->setObjectName("muteButton");
         muteButton->setGeometry(QRect(1180, 310, 61, 41));
@@ -104,6 +101,9 @@ public:
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
         scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1239, 219));
         timeLineScrollArea->setWidget(scrollAreaWidgetContents);
+        playPauseButton = new QPushButton(centralwidget);
+        playPauseButton->setObjectName("playPauseButton");
+        playPauseButton->setGeometry(QRect(1180, 140, 80, 24));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
@@ -136,10 +136,10 @@ public:
         actionExport->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+E", nullptr));
 #endif // QT_CONFIG(shortcut)
         groupBoxVideo->setTitle(QString());
-        playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
         timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
         groupBoxVideosTable->setTitle(QString());
+        playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
     } // retranslateUi
 

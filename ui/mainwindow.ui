@@ -37,19 +37,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="playPauseButton">
-    <property name="geometry">
-     <rect>
-      <x>1150</x>
-      <y>130</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Play</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="muteButton">
     <property name="geometry">
      <rect>
@@ -161,6 +148,19 @@
       </rect>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="playPauseButton">
+    <property name="geometry">
+     <rect>
+      <x>1180</x>
+      <y>140</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Play</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

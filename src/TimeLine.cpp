@@ -3,11 +3,13 @@
 #include "../include/CutRightOperation.h"
 #include "../include/CutLeftOperation.h"
 
+
+
 TimeLine::TimeLine(QWidget *parent)
-        : QWidget(parent),
-          draggingVideo(nullptr),
-          scaleFactor(10.0),
-          currentStateIndex(-1)
+    : QWidget(parent),
+      draggingVideo(nullptr),
+      scaleFactor(10.0),
+      currentStateIndex(-1)
 {
     setAcceptDrops(true);
     lines = { 0, 60, 120, 180};
@@ -20,7 +22,7 @@ TimeLine::TimeLine(QWidget *parent)
         const VideoData *currentVideo = getCurrentIndicatorVideo();
         if (currentVideo) {
             qDebug() << "Current video under indicator:" << currentVideo->getTitle() << "at position:"
-                     << currentVideo->getRect().x() << indicator->getPosition().x();
+                << currentVideo->getRect().x() << indicator->getPosition().x();
             qDebug() << "Time per unit: " << getTimePerUnit();
             qDebug() << "Time from start: " << calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
         } else {
@@ -52,8 +54,6 @@ TimeLine::TimeLine(QWidget *parent)
         }
     });
 }
-
-
 
 void TimeLine::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
@@ -619,11 +619,6 @@ void TimeLine::trimVideoAtIndicator() {
         }
     }
 }
-
-
-
-
-
 
 
 
