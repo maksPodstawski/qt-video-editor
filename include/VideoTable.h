@@ -49,10 +49,8 @@ private:
     void showContextMenu(const QPoint &pos);
     void setupShortcuts();
     void showFileInfo();
-    void playSelectedVideo();
 
     signals:
-    void playVideoRequested(const QString &filePath);
     void videoRemoved(const QString &filePath);
 };
 

@@ -11,7 +11,8 @@ VideoPreview::VideoPreview(TimeLine *timeLine, QWidget *parent)
       audioOutput(new QAudioOutput(this)),
       timeLine(timeLine),
       currentVideoIndex(0),
-      m_iVideoPosition(0) {
+      m_iVideoPosition(0)
+{
     mediaPlayer->setVideoOutput(videoWidget);
     mediaPlayer->setAudioOutput(audioOutput);
 
@@ -61,7 +62,14 @@ void VideoPreview::updateIndicatorPosition(qint64 position) {
 }
 
 
-void VideoPreview::play() {
+void VideoPreview::play()
+{
+    if (mediaPlayer->playbackState() == QMediaPlayer::PausedState) {
+        qDebug() << "Resuming playback from position:" << mediaPlayer->position();
+        mediaPlayer->play();
+        return;
+    }
+
     const auto &videoList = timeLine->getVideoList();
     if (videoList.isEmpty()) {
         qWarning() << "No videos to play.";
@@ -69,6 +77,7 @@ void VideoPreview::play() {
     }
 
     currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
+    qDebug() << "Current video index from timeline:" << currentVideoIndex;
     updatePlayer();
 
     int indicatorX = timeLine->indicator->x();
@@ -80,8 +89,8 @@ void VideoPreview::play() {
     determineStartEndTimes(currentVideo, startTime, endTime);
 
     qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
-    mediaPlayer->setPosition(newPosition);
 
+    mediaPlayer->setPosition(newPosition);
     mediaPlayer->play();
 }
 
@@ -117,7 +126,8 @@ float VideoPreview::getVolume() const {
     return audioOutput->volume();
 }
 
-void VideoPreview::updatePlayer() {
+void VideoPreview::updatePlayer()
+{
     const auto &videoList = timeLine->getVideoList();
     if (currentVideoIndex >= videoList.size()) {
         qWarning() << "Invalid video index:" << currentVideoIndex;
@@ -173,12 +183,6 @@ void VideoPreview::playNextVideo() {
         qDebug() << "Restarting playlist from the beginning.";
         updatePlayer();
     }
-}
-
-void VideoPreview::playVideo(const QString &filePath) {
-    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-    mediaPlayer->play();
-    emit playPauseButtonTextChanged("Pause");
 }
 
 

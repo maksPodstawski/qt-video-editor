@@ -354,9 +354,7 @@ void TimeLine::moveDraggingText(const QPoint &pos) {
 
 void TimeLine::drawSectionBackgrounds(QPainter &painter) {
     painter.fillRect(QRect(0, 0, 60, lines[1]), QColor(230, 240, 255));
-
     painter.fillRect(QRect(0, lines[1], 60, lines[2] - lines[1]), QColor(230, 255, 230));
-
     painter.fillRect(QRect(0, lines[2], 60, height() - lines[2]), QColor(255, 240, 230));
 }
 
@@ -699,11 +697,3 @@ void TimeLine::trimVideoAtIndicator() {
         }
     }
 }
-
-
-
-
-
-
-
-

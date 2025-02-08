@@ -158,10 +158,6 @@ void VideoTable::showContextMenu(const QPoint& pos)
     showFileInfoAction->setShortcut(QKeySequence("Alt+Enter"));
     showFileInfoAction->setShortcutVisibleInContextMenu(true);
 
-    QAction *playVideo = contextMenu.addAction("Play");
-    playVideo->setShortcut(QKeySequence("Enter"));
-    playVideo->setShortcutVisibleInContextMenu(true);
-
     QAction *removeVideo = contextMenu.addAction("Remove Video");
 
     QAction *selectedAction = contextMenu.exec(tableView->viewport()->mapToGlobal(pos));
@@ -172,10 +168,6 @@ void VideoTable::showContextMenu(const QPoint& pos)
     else if (selectedAction == removeVideo) {
         deleteSelectedVideo();
     }
-    else if (selectedAction == playVideo) {
-        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
-        emit playVideoRequested(filePath);
-    }
 }
 
 void VideoTable::setupShortcuts()
@@ -183,19 +175,7 @@ void VideoTable::setupShortcuts()
     QShortcut *showFileInfoShortcut = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Return), this);
     connect(showFileInfoShortcut, &QShortcut::activated, this, &VideoTable::showFileInfo);
 
-    QShortcut *playVideoShorcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
-    connect(playVideoShorcut, &QShortcut::activated, this, &VideoTable::playSelectedVideo);
 }
-
-void VideoTable::playSelectedVideo()
-{
-    QModelIndexList selectedRows = tableView->selectionModel()->selectedRows();
-    for (const QModelIndex &index : selectedRows) {
-        QString filePath = tableModel->item(index.row(), 0)->data(Qt::UserRole).toString();
-        emit playVideoRequested(filePath);
-    }
-}
-
 
 void VideoTable::deleteSelectedVideo() {
     QModelIndexList selectedRows = tableView->selectionModel()->selectedRows();

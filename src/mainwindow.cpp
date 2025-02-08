@@ -64,12 +64,12 @@ MainWindow::MainWindow(QWidget *parent)
         updateDurationLabel();
     });
 
-    connect(videoTable, &VideoTable::playVideoRequested, videoPreviewWidget, &VideoPreview::playVideo);
+
     connect(videoTable, &VideoTable::videoRemoved, timeLine, &TimeLine::removeVideoObjects);
 
-    connect(videoPreviewWidget, &VideoPreview::playPauseButtonTextChanged, this, [this](const QString &text) {
-        ui->playPauseButton->setText(text);
-    });
+    // connect(videoPreviewWidget, &VideoPreview::playPauseButtonTextChanged, this, [this](const QString &text) {
+    //     ui->playPauseButton->setText(text);
+    // });
 
     setupShortcuts();
 }
@@ -82,12 +82,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_playPauseButton_clicked()
 {
-    if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PausedState) {
-        videoPreviewWidget->play();
-        ui->playPauseButton->setText("Pause");
-    } else {
+    if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PlayingState) {
         videoPreviewWidget->pause();
         ui->playPauseButton->setText("Play");
+    } else {
+        videoPreviewWidget->play();
+        ui->playPauseButton->setText("Pause");
     }
 }
 

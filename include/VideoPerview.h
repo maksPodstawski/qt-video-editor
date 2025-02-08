@@ -37,11 +37,7 @@ public:
     TimeLine *timeLine;
 
     signals:
-    void playVideoRequested(const QString &filePath);
     void playPauseButtonTextChanged(const QString &text);
-
-public slots:
-    void playVideo(const QString &filePath);
 
 
 private:
