@@ -634,39 +634,13 @@ void TimeLine::cutLeftVideoAtIndicator() {
             currentVideo->setRect(videoRect);
             update();
         }
-
     }
+
+    emit resetVideoPlayer();
 
     for (VideoData& video : videoList) {
         if (video.getOperations().length() > 0) {
             qDebug() << "CUTTING video:" << video.getTitle();
-        }
-    }
-
-}
-
-void TimeLine::splitVideoAtIndicator() {
-    VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
-    if (currentVideo) {
-        double splitTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
-
-        QString filePath = currentVideo->getFilePath();
-
-        QRect videoRect = currentVideo->getRect();
-        QRect newRect1(videoRect.topLeft(), QPoint(indicator->getPosition().x(), videoRect.bottom()));
-        QRect newRect2(QPoint(indicator->getPosition().x(), videoRect.top()), videoRect.bottomRight());
-
-        currentVideo->addOperation(new CutRightOperation(filePath, splitTime));
-        VideoData newVideo = VideoData(currentVideo->getTitle(), currentVideo->getDuration(), currentVideo->getFilePath(), currentVideo->getExtension(), newRect2);
-        newVideo.addOperation(new CutLeftOperation(filePath, splitTime));
-
-        currentVideo->setRect(newRect1);
-        videoList.append(newVideo);
-    }
-
-    for (VideoData& video : videoList) {
-        if (video.getOperations().length() > 0) {
-            qDebug() << "Splitting video:" << video.getTitle();
         }
     }
 
@@ -700,6 +674,36 @@ void TimeLine::trimVideoAtIndicator() {
     for (VideoData& video : videoList) {
         if (video.getOperations().length() > 0) {
             qDebug() << "Trimming video:" << video.getTitle();
+        }
+    }
+
+}
+
+void TimeLine::splitVideoAtIndicator() {
+    VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
+    if (currentVideo) {
+        double splitTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
+
+        QString filePath = currentVideo->getFilePath();
+
+        QRect videoRect = currentVideo->getRect();
+        QRect newRect1(videoRect.topLeft(), QPoint(indicator->getPosition().x(), videoRect.bottom()));
+        QRect newRect2(QPoint(indicator->getPosition().x(), videoRect.top()), videoRect.bottomRight());
+
+        currentVideo->addOperation(new CutRightOperation(filePath, splitTime));
+        VideoData newVideo = VideoData(currentVideo->getTitle(), currentVideo->getDuration(), currentVideo->getFilePath(), currentVideo->getExtension(), newRect2);
+        newVideo.addOperation(new CutLeftOperation(filePath, splitTime));
+
+        currentVideo->setRect(newRect1);
+        videoList.append(newVideo);
+        update();
+    }
+
+    emit resetVideoPlayer();
+
+    for (VideoData& video : videoList) {
+        if (video.getOperations().length() > 0) {
+            qDebug() << "Splitting video:" << video.getTitle();
         }
     }
 
