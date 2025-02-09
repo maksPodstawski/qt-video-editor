@@ -20,7 +20,6 @@
 #include <QShortcut>
 #include <QMenu>
 #include <QSlider>
-
 #include "TextData.h"
 
 class TimeLine : public QWidget
@@ -39,6 +38,8 @@ public:
     const VideoData* getCurrentIndicatorVideo() const;
     const int getCurrentVideoIndexIndicator() const;
 
+    signals:
+    void resetVideoPlayer();
 
 public slots:
     void removeVideoObjects(const QString &filePath);

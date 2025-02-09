@@ -634,6 +634,7 @@ void TimeLine::cutLeftVideoAtIndicator() {
             currentVideo->setRect(videoRect);
             update();
         }
+
     }
 
     for (VideoData& video : videoList) {
@@ -641,6 +642,7 @@ void TimeLine::cutLeftVideoAtIndicator() {
             qDebug() << "CUTTING video:" << video.getTitle();
         }
     }
+
 }
 
 void TimeLine::splitVideoAtIndicator() {
@@ -667,6 +669,7 @@ void TimeLine::splitVideoAtIndicator() {
             qDebug() << "Splitting video:" << video.getTitle();
         }
     }
+
 }
 
 void TimeLine::trimVideoAtIndicator() {
@@ -691,9 +694,13 @@ void TimeLine::trimVideoAtIndicator() {
             update();
         }
     }
+
+    emit resetVideoPlayer();
+
     for (VideoData& video : videoList) {
         if (video.getOperations().length() > 0) {
             qDebug() << "Trimming video:" << video.getTitle();
         }
     }
+
 }

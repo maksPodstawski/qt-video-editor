@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->videoPreviewWidget = new VideoPreview(this->timeLine, this);
 
+
     QVBoxLayout *layout = new QVBoxLayout(ui->groupBoxVideo);
     layout->addWidget(videoPreviewWidget);
     ui->groupBoxVideo->setLayout(layout);
@@ -67,9 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(videoTable, &VideoTable::videoRemoved, timeLine, &TimeLine::removeVideoObjects);
 
-    // connect(videoPreviewWidget, &VideoPreview::playPauseButtonTextChanged, this, [this](const QString &text) {
-    //     ui->playPauseButton->setText(text);
-    // });
+    connect(timeLine, &TimeLine::resetVideoPlayer, videoPreviewWidget, &VideoPreview::resetVideoPlayer);
 
     setupShortcuts();
 }

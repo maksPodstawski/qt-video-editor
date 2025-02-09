@@ -40,6 +40,9 @@ public:
     void playPauseButtonTextChanged(const QString &text);
 
 
+public slots:
+    void resetVideoPlayer();
+
 private:
     QMediaPlayer *mediaPlayer;
     QVideoWidget *videoWidget;

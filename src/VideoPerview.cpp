@@ -98,6 +98,12 @@ void VideoPreview::stop() {
     mediaPlayer->stop();
 }
 
+void VideoPreview::resetVideoPlayer()
+{
+    qDebug() <<"fsdafasdfsadfasd";
+    stop();
+}
+
 void VideoPreview::pause() {
     mediaPlayer->pause();
 }
