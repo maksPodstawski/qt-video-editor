@@ -49,6 +49,10 @@ add_executable(video_editor
         include/CutLeftOperation.h
         src/Options.cpp
         include/Options.h
+        include/ProjectSaver.h
+        src/ProjectSaver.cpp
+        include/ProjectLoader.h
+        src/ProjectLoader.cpp
 )
 
 target_link_libraries(video_editor

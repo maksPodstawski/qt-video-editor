@@ -1,7 +1,3 @@
-//
-// Created by czest on 09.02.2025.
-//
-
 #include "../include/Options.h"
 
 void Options::setResolution(const QString &resolution) {

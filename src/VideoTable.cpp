@@ -186,6 +186,21 @@ void VideoTable::deleteSelectedVideo() {
     }
 }
 
+QList<QString> VideoTable::getLoadedVideos() const
+{
+    QList<QString> films;
+    if (!tableModel)
+        return films;
+
+    for (int row = 0; row < tableModel->rowCount(); ++row) {
+        QStandardItem *item = tableModel->item(row, 3);
+        if (item) {
+            films.append(item->text());
+        }
+    }
+    return films;
+}
+
 void VideoTable::showFileInfo()
 {
     QModelIndexList selectedIndexes = tableView->selectionModel()->selectedIndexes();

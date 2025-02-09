@@ -30,6 +30,7 @@ public:
     void setDuration(const QString &duration);
     void setExtension(const QString &extension);
     void setRect(const QRect &rect);
+    void setColor(const QColor& color);
 
     void setStartTime(qreal startTime);
     void setEndTime(qreal endTime);

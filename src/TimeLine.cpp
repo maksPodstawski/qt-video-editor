@@ -509,6 +509,13 @@ const int TimeLine::getCurrentVideoIndexIndicator() const {
     return 0;
 }
 
+void TimeLine::setVideoList(const QList<VideoData>& newVideoList)
+{
+    videoList = newVideoList;
+    updateVideoPositions();
+    update();
+}
+
 QTime TimeLine::getVideoDurationTime() {
     int totalMilliseconds = 0;
     for (const VideoData &video: videoList) {

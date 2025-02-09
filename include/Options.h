@@ -1,7 +1,3 @@
-//
-// Created by czest on 09.02.2025.
-//
-
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include <QString>

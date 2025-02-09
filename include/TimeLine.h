@@ -34,6 +34,7 @@ public:
     double getTimePerUnit();
     const VideoData* getCurrentIndicatorVideo() const;
     const int getCurrentVideoIndexIndicator() const;
+    void setVideoList(const QList<VideoData>& newVideoList);
 
     signals:
     void resetVideoPlayer();

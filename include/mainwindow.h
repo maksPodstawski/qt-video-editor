@@ -8,6 +8,9 @@
 #include "VideoTable.h"
 #include "TimeLine.h"
 #include "Editor.h"
+#include "Options.h"
+#include "ProjectSaver.h"
+#include "ProjectLoader.h"
 #include <QMainWindow>
 #include <QVideoWidget>
 #include <QMediaPlayer>
@@ -20,7 +23,6 @@
 #include <QStyleFactory>
 #include <QScrollArea>
 
-#include "Options.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -46,6 +48,10 @@ private slots:
 
 
     void on_actionExport_options_triggered();
+
+    void on_actionSave_Project_triggered();
+
+    void on_actionOpen_Project_triggered();
 
 private:
     Ui::MainWindow *ui;

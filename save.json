@@ -1,0 +1,42 @@
+{
+    "timelineVideos": [
+        {
+            "color": "#b6d1fc",
+            "duration": "00:29",
+            "endTime": -1,
+            "filePath": "C:/Users/Matys/Desktop/video1.mp4",
+            "height": 60,
+            "startTime": 0,
+            "title": "video1",
+            "width": 290,
+            "x": 236,
+            "y": 0
+        },
+        {
+            "color": "#a2fcfa",
+            "duration": "00:21",
+            "endTime": -1,
+            "filePath": "C:/Users/Matys/Desktop/video2.mp4",
+            "height": 60,
+            "startTime": 0,
+            "title": "video2",
+            "width": 210,
+            "x": 564,
+            "y": 0
+        }
+    ],
+    "videoLibrary": [
+        {
+            "duration": "00:29",
+            "format": "MP4",
+            "path": "C:/Users/Matys/Desktop/video1.mp4",
+            "title": "video1"
+        },
+        {
+            "duration": "00:21",
+            "format": "MP4",
+            "path": "C:/Users/Matys/Desktop/video2.mp4",
+            "title": "video2"
+        }
+    ]
+}

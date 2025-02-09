@@ -29,7 +29,9 @@ public:
 
     void updateTable(const QList<QString> &mediaFiles);
 
+
     void deleteSelectedVideo();
+    QList<QString> getLoadedVideos() const;
     static QString getDurationText(const QString &filePath);
     static QString getFileFormat(const QString &filePath);
 

@@ -37,6 +37,10 @@ void VideoData::setEndTime(qreal endTime) {
     this->endTime = endTime;
 }
 
+void VideoData::setColor(const QColor& color) {
+    this->color = color;
+}
+
 QString VideoData::getTitle() const {
     return title;
 }

@@ -252,3 +252,40 @@ void MainWindow::on_actionExport_options_triggered()
     }
 }
 
+
+void MainWindow::on_actionSave_Project_triggered()
+{
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Save Project"), "", tr("JSON Files (*.json)"));
+    if (!filePath.isEmpty()) {
+
+        QList<VideoData> timelineVideos = timeLine->getVideoList();
+        QList<QString> videoLibrary = videoTable->getLoadedVideos();
+
+        ProjectSaver saver(timelineVideos, videoLibrary, filePath);
+        if (saver.saveProject()) {
+            QMessageBox::information(this, tr("Success"), tr("Project saved successfully."));
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to save project."));
+        }
+    }
+}
+
+
+void MainWindow::on_actionOpen_Project_triggered()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("JSON Files (*.json)"));
+    if (!filePath.isEmpty()) {
+        ProjectLoader loader(filePath);
+        QList<VideoData> timelineVideos;
+        QList<QString> videoLibrary;
+        if (loader.loadProject(timelineVideos, videoLibrary))
+        {
+            timeLine->setVideoList(timelineVideos);
+            videoTable->updateTable(videoLibrary);
+            QMessageBox::information(this, tr("Success"), tr("Project loaded successfully."));
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to load project."));
+        }
+    }
+}
+

@@ -32,6 +32,8 @@ public:
     QAction *actionOpen;
     QAction *actionExport;
     QAction *actionExport_options;
+    QAction *actionSave_Project;
+    QAction *actionOpen_Project;
     QWidget *centralwidget;
     QGroupBox *groupBoxVideo;
     QSlider *volumeChangeSlider;
@@ -59,6 +61,10 @@ public:
         actionExport->setObjectName("actionExport");
         actionExport_options = new QAction(MainWindow);
         actionExport_options->setObjectName("actionExport_options");
+        actionSave_Project = new QAction(MainWindow);
+        actionSave_Project->setObjectName("actionSave_Project");
+        actionOpen_Project = new QAction(MainWindow);
+        actionOpen_Project->setObjectName("actionOpen_Project");
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         groupBoxVideo = new QGroupBox(centralwidget);
@@ -123,6 +129,8 @@ public:
 
         menubar->addAction(menuFile->menuAction());
         menubar->addAction(menuOptions->menuAction());
+        menuFile->addAction(actionOpen_Project);
+        menuFile->addAction(actionSave_Project);
         menuFile->addAction(actionOpen);
         menuFile->addAction(actionExport);
         menuOptions->addAction(actionExport_options);
@@ -144,6 +152,14 @@ public:
         actionExport->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+E", nullptr));
 #endif // QT_CONFIG(shortcut)
         actionExport_options->setText(QCoreApplication::translate("MainWindow", "Export options", nullptr));
+        actionSave_Project->setText(QCoreApplication::translate("MainWindow", "Save Project", nullptr));
+#if QT_CONFIG(shortcut)
+        actionSave_Project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+S", nullptr));
+#endif // QT_CONFIG(shortcut)
+        actionOpen_Project->setText(QCoreApplication::translate("MainWindow", "Open Project", nullptr));
+#if QT_CONFIG(shortcut)
+        actionOpen_Project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+O", nullptr));
+#endif // QT_CONFIG(shortcut)
         groupBoxVideo->setTitle(QString());
         playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));

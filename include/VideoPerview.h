@@ -28,7 +28,6 @@ public:
     void stop();
     void setPosition(qint64 position);
     void setVolume(float volume);
-    void setVideoFiles(const QList<QString> &files);
     float getVolume() const;
     qint64 getDuration();
     qint64 getPosition();
