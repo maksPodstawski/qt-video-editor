@@ -55,6 +55,7 @@ private:
 private slots:
     void playNextVideo();
     void updatePlayer();
+    void onIndicatorPositionChanged();
 };
 
 #endif // VIDEOPERVIEW_H

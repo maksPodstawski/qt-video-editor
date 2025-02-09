@@ -624,3 +624,4 @@ void TimeLine::splitVideoAtIndicator() {
 
     emit resetVideoPlayer();
 }
+

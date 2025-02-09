@@ -45,6 +45,7 @@ void Indicator::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         dragging = false;
+        emit indicatorReleased();
     }
 }
 

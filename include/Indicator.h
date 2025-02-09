@@ -32,6 +32,7 @@ signals:
     void cutRight();
     void cutLeft();
     void split();
+    void indicatorReleased();
 };
 
 #endif //VIDEO_EDITOR_INDICATOR_H

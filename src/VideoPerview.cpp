@@ -27,6 +27,8 @@ VideoPreview::VideoPreview(TimeLine *timeLine, QWidget *parent)
             playNextVideo();
         }
     });
+
+    connect(timeLine->indicator, &Indicator::indicatorReleased, this, &VideoPreview::onIndicatorPositionChanged);
 }
 
 void VideoPreview::updateIndicatorPosition(qint64 position) {
@@ -65,14 +67,31 @@ void VideoPreview::updateIndicatorPosition(qint64 position) {
 void VideoPreview::play()
 {
     if (mediaPlayer->playbackState() == QMediaPlayer::PausedState) {
-        qDebug() << "Resuming playback from position:" << mediaPlayer->position();
+        int indicatorX = timeLine->indicator->x();
+        const auto &videoList = timeLine->getVideoList();
+        if (videoList.isEmpty()) {
+            qWarning() << "No videos to play.";
+            return;
+        }
+
+        const VideoData &currentVideo = videoList[currentVideoIndex];
+        int startX = currentVideo.getRect().left();
+        double timePerUnit = timeLine->getTimePerUnit();
+
+        qreal startTime, endTime;
+        determineStartEndTimes(currentVideo, startTime, endTime);
+        qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+        mediaPlayer->setPosition(m_iVideoPosition);
+        qDebug() << "Resuming playback from new position:" << newPosition;
         mediaPlayer->play();
         return;
     }
 
     const auto &videoList = timeLine->getVideoList();
+
     if (videoList.isEmpty()) {
-        qWarning() << "No videos to play.";
+        qWarning() << "No videos to stop.";
         return;
     }
 
@@ -90,21 +109,54 @@ void VideoPreview::play()
 
     qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
 
-    mediaPlayer->setPosition(newPosition);
+    qDebug() << "Starting playback from position:" << newPosition;
+
+    mediaPlayer->setPosition(m_iVideoPosition);
     mediaPlayer->play();
 }
 
 void VideoPreview::stop() {
+    const auto &videoList = timeLine->getVideoList();
+    if (videoList.isEmpty()) {
+        qWarning() << "No videos to stop.";
+        return;
+    }
+
+    const VideoData &currentVideo = videoList[currentVideoIndex];
+    qreal startTime, endTime;
+    determineStartEndTimes(currentVideo, startTime, endTime);
+
+    int indicatorX = timeLine->indicator->x();
+    int startX = currentVideo.getRect().left();
+    double timePerUnit = timeLine->getTimePerUnit();
+    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+    m_iVideoPosition = static_cast<qint64>(newPosition);
     mediaPlayer->stop();
 }
 
 void VideoPreview::resetVideoPlayer()
 {
-    qDebug() <<"fsdafasdfsadfasd";
     stop();
 }
 
 void VideoPreview::pause() {
+    const auto &videoList = timeLine->getVideoList();
+    if (videoList.isEmpty()) {
+        qWarning() << "No videos to stop.";
+        return;
+    }
+
+    const VideoData &currentVideo = videoList[currentVideoIndex];
+    qreal startTime, endTime;
+    determineStartEndTimes(currentVideo, startTime, endTime);
+
+    int indicatorX = timeLine->indicator->x();
+    int startX = currentVideo.getRect().left();
+    double timePerUnit = timeLine->getTimePerUnit();
+    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+    m_iVideoPosition = static_cast<qint64>(newPosition);
     mediaPlayer->pause();
 }
 
@@ -145,7 +197,13 @@ void VideoPreview::updatePlayer()
 
     qreal startTime, endTime;
     determineStartEndTimes(currentVideo, startTime, endTime);
-    m_iVideoPosition = static_cast<qint64>(startTime);
+
+    int indicatorX = timeLine->indicator->x();
+    int startX = currentVideo.getRect().left();
+    double timePerUnit = timeLine->getTimePerUnit();
+    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+    m_iVideoPosition = static_cast<qint64>(newPosition);
 
     disconnect(mediaPlayer, &QMediaPlayer::positionChanged, nullptr, nullptr);
     disconnect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, nullptr, nullptr);
@@ -169,13 +227,32 @@ void VideoPreview::updatePlayer()
     });
 
     connect(mediaPlayer, &QMediaPlayer::positionChanged, this, [this, endTime](qint64 position) {
-        qDebug() << "END TIME:" << endTime;
         if (endTime != -1 && position >= static_cast<qint64>(endTime)) {
-            qDebug() << "Video ended at:" << position;
             mediaPlayer->stop();
             playNextVideo();
         }
     });
+}
+
+void VideoPreview::onIndicatorPositionChanged() {
+    const auto &videoList = timeLine->getVideoList();
+    if (videoList.isEmpty()) {
+        qWarning() << "No videos to stop.";
+        return;
+    }
+    const VideoData *currentVideo = timeLine->getCurrentIndicatorVideo();
+    this->currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
+
+    this->mediaPlayer->setSource(QUrl::fromLocalFile(currentVideo->getFilePath()));
+    qreal startTime, endTime;
+    determineStartEndTimes(*currentVideo, startTime, endTime);
+
+    int indicatorX = timeLine->indicator->x();
+    int startX = currentVideo->getRect().left();
+    double timePerUnit = timeLine->getTimePerUnit();
+    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+    m_iVideoPosition = static_cast<qint64>(newPosition);
 }
 
 void VideoPreview::playNextVideo() {
@@ -183,11 +260,12 @@ void VideoPreview::playNextVideo() {
     if (currentVideoIndex + 1 < videoList.size()) {
         currentVideoIndex++;
         updatePlayer();
+        mediaPlayer->setPosition(0);
         mediaPlayer->play();
     } else {
         currentVideoIndex = 0;
-        qDebug() << "Restarting playlist from the beginning.";
         updatePlayer();
+        mediaPlayer->setPosition(0);
     }
 }
 
@@ -198,7 +276,4 @@ void VideoPreview::determineStartEndTimes(const VideoData &videoData, qreal &sta
 
     startTime = videoData.getStartTime();
     endTime = videoData.getEndTime();
-
-    qDebug() << "Determining start and end times for video:" << videoData.getTitle() << "Start:" << startTime << "End:"
-            << endTime;
 }
