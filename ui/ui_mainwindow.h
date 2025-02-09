@@ -31,6 +31,7 @@ class Ui_MainWindow
 public:
     QAction *actionOpen;
     QAction *actionExport;
+    QAction *actionExport_options;
     QWidget *centralwidget;
     QGroupBox *groupBoxVideo;
     QSlider *volumeChangeSlider;
@@ -44,6 +45,7 @@ public:
     QWidget *scrollAreaWidgetContents;
     QMenuBar *menubar;
     QMenu *menuFile;
+    QMenu *menuOptions;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -55,6 +57,8 @@ public:
         actionOpen->setObjectName("actionOpen");
         actionExport = new QAction(MainWindow);
         actionExport->setObjectName("actionExport");
+        actionExport_options = new QAction(MainWindow);
+        actionExport_options->setObjectName("actionExport_options");
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         groupBoxVideo = new QGroupBox(centralwidget);
@@ -110,14 +114,18 @@ public:
         menubar->setGeometry(QRect(0, 0, 1297, 21));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName("menuFile");
+        menuOptions = new QMenu(menubar);
+        menuOptions->setObjectName("menuOptions");
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
         MainWindow->setStatusBar(statusbar);
 
         menubar->addAction(menuFile->menuAction());
+        menubar->addAction(menuOptions->menuAction());
         menuFile->addAction(actionOpen);
         menuFile->addAction(actionExport);
+        menuOptions->addAction(actionExport_options);
 
         retranslateUi(MainWindow);
 
@@ -135,12 +143,14 @@ public:
 #if QT_CONFIG(shortcut)
         actionExport->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+E", nullptr));
 #endif // QT_CONFIG(shortcut)
+        actionExport_options->setText(QCoreApplication::translate("MainWindow", "Export options", nullptr));
         groupBoxVideo->setTitle(QString());
         playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
         timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
         groupBoxVideosTable->setTitle(QString());
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
+        menuOptions->setTitle(QCoreApplication::translate("MainWindow", "Options", nullptr));
     } // retranslateUi
 
 };

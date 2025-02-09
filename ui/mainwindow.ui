@@ -179,7 +179,14 @@
     <addaction name="actionOpen"/>
     <addaction name="actionExport"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionExport_options"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -196,6 +203,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionExport_options">
+   <property name="text">
+    <string>Export options</string>
    </property>
   </action>
  </widget>
