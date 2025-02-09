@@ -164,8 +164,7 @@ void MainWindow::on_actionExport_triggered()
             qDebug() << "Exporting video: " << video.getFilePath();
             updatedVideoList.append(video);
         }
-        QList<TextData> textList = timeLine->getTextList();
-        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName, textList,this);
+        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName,this);
         connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {
             if (success) {
                 QMessageBox::information(this, "Success", "Video exported successfully");

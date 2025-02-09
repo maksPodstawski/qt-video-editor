@@ -7,8 +7,7 @@
 #include <QDir>
 
 
-bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile,
-                           const QList<TextData> &textList) {
+bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile) {
     if (inputVideos.isEmpty()) {
         qWarning() << "No input videos provided.";
         return false;
@@ -69,67 +68,9 @@ bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &o
     }
 
     qDebug() << "Videos successfully combined into:" << outputFile;
-
-    QString finalOutputFile = outputFile;
-    if (!textList.isEmpty()) {
-        QString tempOutputFile = QDir::temp().absoluteFilePath("combined_with_text.mp4");
-        if (!addTextToVideo(outputFile, tempOutputFile, textList)) {
-            return false;
-        }
-        finalOutputFile = tempOutputFile;
-        QFile::remove(outputFile);
-        QFile::copy(finalOutputFile, outputFile);
-    }
-
     return true;
 }
 
-bool Editor::addTextToVideo(const QString &inputFile, const QString &outputFile, const QList<TextData> &textList) {
-    if (!QFile::exists(inputFile)) {
-        qWarning() << "File does not exist:" << inputFile;
-        return false;
-    }
-
-    QStringList filterComplexArgs;
-    for (const TextData &textData : textList) {
-        QString escapedText = textData.getText()
-            .replace("'", "\\'")
-            .replace(":", "\\:");
-
-        QString drawText = QString("drawtext=text='%1':fontfile='C\\:\\\\Windows\\\\Fonts\\\\arial.ttf':fontsize=%2:fontcolor=white:x=%3:y=%4")
-            .arg(escapedText)
-            .arg(textData.getFontSize())
-            .arg(textData.getPosX())
-            .arg(textData.getPosY());
-
-        filterComplexArgs << drawText;
-    }
-
-    QString filterComplex = filterComplexArgs.join(",");
-    QStringList addTextArgs;
-    addTextArgs << "-i" << inputFile
-                << "-vf" << filterComplex
-                << "-codec:a" << "copy"
-                << "-y" << outputFile;
-
-    QProcess addTextProcess;
-    addTextProcess.start("ffmpeg", addTextArgs);
-
-    if (!addTextProcess.waitForFinished(300000)) {
-        qWarning() << "FFmpeg process timed out";
-        addTextProcess.kill();
-        return false;
-    }
-
-    QByteArray processError = addTextProcess.readAllStandardError();
-    if (addTextProcess.exitStatus() != QProcess::NormalExit || addTextProcess.exitCode() != 0) {
-        qWarning() << "Failed to add text to video:" << inputFile;
-        qWarning() << "FFmpeg error:" << processError;
-        return false;
-    }
-    qWarning() << "ADDING TEXT:" << outputFile;
-    return true;
-}
 
 bool Editor::trimVideo(const QString &inputFile, const QString &outputFile, double startTime) {
     if (!QFile::exists(inputFile)) {

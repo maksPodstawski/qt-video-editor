@@ -2,8 +2,6 @@
 #include "../include/VideoPerview.h"
 #include "../include/CutRightOperation.h"
 #include "../include/CutLeftOperation.h"
-#include "../include/AddTextDialog.h"
-#include "../include/TextData.h"
 
 TimeLine::TimeLine(QWidget *parent)
         : QWidget(parent),
@@ -27,6 +25,9 @@ TimeLine::TimeLine(QWidget *parent)
             qDebug() << "Time from start: " << calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
         } else {
             qDebug() << "No video under indicator.";
+        }
+        for (auto video: videoList) {
+            qDebug() << "Video:" << video.getTitle() << "Start:" << video.getStartTime() << "End:" << video.getEndTime();
         }
     });
 
@@ -64,7 +65,6 @@ void TimeLine::paintEvent(QPaintEvent *event) {
     drawContentLabels(painter);
     drawLines(painter);
     drawVideos(painter);
-    drawTextItems(painter);
     drawTextOnVideos(painter);
 
     painter.setPen(QPen(Qt::red, 2));
@@ -187,22 +187,11 @@ void TimeLine::mousePressEvent(QMouseEvent *event) {
             break;
         }
     }
-    for (TextData &text: textList) {
-        if (text.getRect().contains(event->pos())) {
-            draggingText = &text;
-            dragStartPos = event->pos() - text.getRect().topLeft();
-            qDebug() << "Started dragging text:" << text.getText();
-            return;
-        }
-    }
 }
 
 void TimeLine::mouseMoveEvent(QMouseEvent *event) {
     if (draggingVideo) {
         moveDraggingVideo(event->pos());
-        update();
-    }else if (draggingText) {
-        moveDraggingText(event->pos());
         update();
     }
 }
@@ -236,11 +225,6 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event) {
         updateVideoPositions();
         draggingVideo = nullptr;
         qDebug() << "Film released at position: " << rect;
-        saveState();
-        update();
-    }
-    else if (draggingText) {
-        draggingText = nullptr;
         saveState();
         update();
     }
@@ -293,34 +277,6 @@ void TimeLine::drawContentLabels(QPainter &painter) {
     painter.drawText(imageLabelRect, Qt::AlignLeft | Qt::AlignVCenter, "Image");
 }
 
-void TimeLine::drawTextItems(QPainter &painter) {
-    painter.setPen(QPen(Qt::black));
-    for (const TextData &text : textList) {
-        QRect textRect = text.getRect();
-        painter.setBrush(QBrush(Qt::yellow)); // Optional: Set a background color for text blocks
-        painter.drawRect(textRect);
-        painter.setFont(text.getFont());
-        painter.drawText(textRect, Qt::AlignCenter, text.getText());
-    }
-}
-
-void TimeLine::showAddTextDialog(const QPoint &clickPosition) {
-    AddTextDialog dialog(this);
-    if (dialog.exec() == QDialog::Accepted) {
-        QString text = dialog.getText();
-        QPoint position = dialog.getPosition();
-        int fontSize = dialog.getFontSize();
-        QFont font = dialog.getFont();
-
-        QRect textRect(clickPosition, QSize(100, LINE_HEIGHT));
-        TextData textData(text, font, fontSize, textRect, position.x(), position.y());
-
-        textList.append(textData);
-        saveState();
-        update();
-    }
-}
-
 void TimeLine::updateVideoPositions() {
     std::sort(videoList.begin(), videoList.end(), [](const VideoData &a, const VideoData &b) {
         return a.getRect().left() < b.getRect().left();
@@ -333,24 +289,6 @@ void TimeLine::updateVideoPositions() {
     update();
 }
 
-void TimeLine::moveDraggingText(const QPoint &pos) {
-    QRect rect = draggingText->getRect();
-    QPoint newPosition = pos - dragStartPos;
-
-    int adjustedX = qBound(60, newPosition.x(), width() - rect.width());
-    int adjustedY = qBound(lines[0], findNearestLine(newPosition.y()), lines.last() - rect.height());
-
-    rect.moveTopLeft(QPoint(adjustedX, adjustedY));
-
-    for (const TextData &text: textList) {
-        if (text.getRect() != draggingText->getRect() && text.getRect().intersects(rect)) {
-            return;
-        }
-    }
-
-    draggingText->setRect(rect);
-    qDebug() << "Dragging text " << draggingText->getText() << " to position: " << rect;
-}
 
 void TimeLine::drawSectionBackgrounds(QPainter &painter) {
     painter.fillRect(QRect(0, 0, 60, lines[1]), QColor(230, 240, 255));
@@ -479,10 +417,6 @@ void TimeLine::cutVideo(QList<VideoData>::iterator i) {
 
 void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
     QMenu contextMenu(this);
-
-    QAction *addTextAction = contextMenu.addAction("Add Text");
-    addTextAction->setShortcutVisibleInContextMenu(true);
-
     QAction *selectedAction = nullptr;
 
     for (auto i = videoList.begin(); i != videoList.end(); i++) {
@@ -512,8 +446,6 @@ void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
                 videoList.erase(i);
                 saveState();
                 update();
-            } else if (selectedAction == addTextAction) {
-                showAddTextDialog(event->pos());
             }
             return;
         }
@@ -523,9 +455,7 @@ void TimeLine::contextMenuEvent(QContextMenuEvent *event) {
         selectedAction = contextMenu.exec(event->globalPos());
     }
 
-    if (selectedAction == addTextAction) {
-        showAddTextDialog(event->pos());
-    } else if (selectedAction && copiedVideo.has_value()) {
+   if (selectedAction && copiedVideo.has_value()) {
         QAction *pasteAction = contextMenu.addAction("Paste");
         pasteAction->setShortcut(QKeySequence("Ctrl+V"));
         pasteAction->setShortcutVisibleInContextMenu(true);
@@ -550,10 +480,6 @@ void TimeLine::removeVideoObjects(const QString &filePath) {
 
 QList<VideoData> TimeLine::getVideoList() const {
     return this->videoList;
-}
-
-QList<TextData> TimeLine::getTextList() const {
-    return this->textList;
 }
 
 void TimeLine::setupIndicator() {
@@ -615,22 +541,32 @@ qreal TimeLine::calculateTimeFromVideoStart(const VideoData &video, int x) {
     return distance * getTimePerUnit();
 }
 
-void TimeLine::cutLeftVideoAtIndicator() {
+void TimeLine::cutVideoAtIndicator(bool cutLeft) {
     VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
     if (currentVideo) {
         qreal cutTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
-
         QString filePath = currentVideo->getFilePath();
 
-        currentVideo->addOperation(new CutLeftOperation(filePath, cutTime));
-        currentVideo->setStartTime(cutTime);
+        if (cutLeft) {
+            currentVideo->addOperation(new CutLeftOperation(filePath, cutTime));
+            currentVideo->setStartTime(cutTime);
+        } else {
+            currentVideo->addOperation(new CutRightOperation(filePath, cutTime));
+            currentVideo->setEndTime(cutTime);
+        }
 
         int indicatorPos = indicator->getPosition().x();
         QRect videoRect = currentVideo->getRect();
         if (indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
-            int newWidth = videoRect.right() - indicatorPos;
-            videoRect.setLeft(indicatorPos);
-            videoRect.setWidth(newWidth);
+            if (cutLeft) {
+                int newWidth = videoRect.right() - indicatorPos;
+                videoRect.setLeft(indicatorPos);
+                videoRect.setWidth(newWidth);
+            } else {
+                int newWidth = indicatorPos - videoRect.left();
+                videoRect.setWidth(newWidth);
+                videoRect.setRight(indicatorPos);
+            }
             currentVideo->setRect(videoRect);
             update();
         }
@@ -640,43 +576,17 @@ void TimeLine::cutLeftVideoAtIndicator() {
 
     for (VideoData& video : videoList) {
         if (video.getOperations().length() > 0) {
-            qDebug() << "CUTTING video:" << video.getTitle();
+            qDebug() << (cutLeft ? "CUTTING" : "Trimming") << "video:" << video.getTitle();
         }
     }
+}
 
+void TimeLine::cutLeftVideoAtIndicator() {
+    cutVideoAtIndicator(true);
 }
 
 void TimeLine::trimVideoAtIndicator() {
-    VideoData* currentVideo = const_cast<VideoData*>(getCurrentIndicatorVideo());
-    if (currentVideo) {
-        double trimTime = calculateTimeFromVideoStart(*currentVideo, indicator->getPosition().x());
-
-        QString filePath = currentVideo->getFilePath();
-
-        qDebug() << "Trim TIme: " << trimTime;
-
-        currentVideo->addOperation(new CutRightOperation(filePath, trimTime));
-        currentVideo->setEndTime(trimTime);
-
-        int indicatorPos = indicator->getPosition().x();
-        QRect videoRect = currentVideo->getRect();
-        if (indicatorPos > videoRect.left() && indicatorPos < videoRect.right()) {
-            int newWidth = indicatorPos - videoRect.left();
-            videoRect.setWidth(newWidth);
-            videoRect.setRight(indicatorPos);
-            currentVideo->setRect(videoRect);
-            update();
-        }
-    }
-
-    emit resetVideoPlayer();
-
-    for (VideoData& video : videoList) {
-        if (video.getOperations().length() > 0) {
-            qDebug() << "Trimming video:" << video.getTitle();
-        }
-    }
-
+    cutVideoAtIndicator(false);
 }
 
 void TimeLine::splitVideoAtIndicator() {
@@ -688,11 +598,17 @@ void TimeLine::splitVideoAtIndicator() {
 
         QRect videoRect = currentVideo->getRect();
         QRect newRect1(videoRect.topLeft(), QPoint(indicator->getPosition().x(), videoRect.bottom()));
-        QRect newRect2(QPoint(indicator->getPosition().x(), videoRect.top()), videoRect.bottomRight());
+        QRect newRect2(QPoint(indicator->getPosition().x() + 1, videoRect.top()), videoRect.bottomRight());
 
         currentVideo->addOperation(new CutRightOperation(filePath, splitTime));
+        currentVideo->setStartTime(currentVideo->getStartTime());
+
         VideoData newVideo = VideoData(currentVideo->getTitle(), currentVideo->getDuration(), currentVideo->getFilePath(), currentVideo->getExtension(), newRect2);
         newVideo.addOperation(new CutLeftOperation(filePath, splitTime));
+        newVideo.setStartTime(splitTime);
+        newVideo.setEndTime(currentVideo->getEndTime());
+        currentVideo->setEndTime(splitTime);
+
 
         currentVideo->setRect(newRect1);
         videoList.append(newVideo);
@@ -700,11 +616,4 @@ void TimeLine::splitVideoAtIndicator() {
     }
 
     emit resetVideoPlayer();
-
-    for (VideoData& video : videoList) {
-        if (video.getOperations().length() > 0) {
-            qDebug() << "Splitting video:" << video.getTitle();
-        }
-    }
-
 }

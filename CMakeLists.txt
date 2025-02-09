@@ -47,10 +47,6 @@ add_executable(video_editor
         include/CutRightOperation.h
         src/CutLeftOperation.cpp
         include/CutLeftOperation.h
-        src/TextData.cpp
-        include/TextData.h
-        src/AddTextDialog.cpp
-        include/AddTextDialog.h
 )
 
 target_link_libraries(video_editor

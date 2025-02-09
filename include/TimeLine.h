@@ -20,15 +20,12 @@
 #include <QShortcut>
 #include <QMenu>
 #include <QSlider>
-#include "TextData.h"
-
 class TimeLine : public QWidget
 {
     Q_OBJECT
 public:
     explicit TimeLine(QWidget *parent = nullptr);
     QList<VideoData> getVideoList() const;
-    QList<TextData> getTextList() const;
 
     void saveState();
     void undoState();
@@ -60,8 +57,7 @@ private:
 
     QList<int> lines;
     QList<VideoData> videoList;
-    QList<TextData> textList;
-    TextData* draggingText;
+
 
     double scaleFactor;
     VideoData *draggingVideo;
@@ -115,6 +111,7 @@ private:
 
     double calculateTimeFromVideoStart(const VideoData &video, int x);
 
+    void cutVideoAtIndicator(bool cutLeft);
 };
 
 #endif // TIMELINE_H
