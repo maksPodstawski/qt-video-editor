@@ -47,6 +47,8 @@ add_executable(video_editor
         include/CutRightOperation.h
         src/CutLeftOperation.cpp
         include/CutLeftOperation.h
+        src/Options.cpp
+        include/Options.h
 )
 
 target_link_libraries(video_editor

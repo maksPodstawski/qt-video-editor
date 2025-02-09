@@ -20,6 +20,8 @@
 #include <QStyleFactory>
 #include <QScrollArea>
 
+#include "Options.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -43,9 +45,11 @@ private slots:
     void on_actionExport_triggered();
 
 
+    void on_actionExport_options_triggered();
+
 private:
     Ui::MainWindow *ui;
-
+    Options *options;
     VideoPreview *videoPreviewWidget;
     VideoTable *videoTable;
     TimeLine *timeLine;

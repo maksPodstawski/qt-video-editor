@@ -1,7 +1,10 @@
 #include "../include/mainwindow.h"
 #include "../include/VideoCombiner.h"
 #include "../include/VideoTable.h"
-
+#include "QInputDialog"
+#include "QFormLayout"
+#include "QLineEdit"
+#include "QSpinBox"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     , videoTable(new VideoTable(this))
     , timeLine(new TimeLine(this))
     , editor(new Editor)
+    , options(new Options)
 {
     ui->setupUi(this);
 
@@ -70,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(timeLine, &TimeLine::resetVideoPlayer, videoPreviewWidget, &VideoPreview::resetVideoPlayer);
 
+    
     setupShortcuts();
 }
 
@@ -164,7 +169,7 @@ void MainWindow::on_actionExport_triggered()
             qDebug() << "Exporting video: " << video.getFilePath();
             updatedVideoList.append(video);
         }
-        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName,this);
+        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName, this->options->getResolution(), this->options->getFrameRate() ,this);
         connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {
             if (success) {
                 QMessageBox::information(this, "Success", "Video exported successfully");
@@ -214,4 +219,36 @@ void MainWindow::setupShortcuts()
 
 }
 
+
+
+void MainWindow::on_actionExport_options_triggered()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Export Options"));
+
+    QFormLayout form(&dialog);
+
+    QLineEdit *resolutionEdit = new QLineEdit(&dialog);
+    resolutionEdit->setText(options->getResolution());
+    form.addRow(new QLabel(tr("Resolution (e.g., 1280:720):")), resolutionEdit);
+
+    QSpinBox *frameRateSpinBox = new QSpinBox(&dialog);
+    frameRateSpinBox->setRange(1, 120);
+    frameRateSpinBox->setValue(options->getFrameRate());
+    form.addRow(new QLabel(tr("Frame Rate (fps):")), frameRateSpinBox);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    form.addRow(&buttonBox);
+
+    connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString resolution = resolutionEdit->text();
+        int frameRate = frameRateSpinBox->value();
+        options->setResolution(resolution);
+        options->setFrameRate(frameRate);
+        qDebug() << "Resolution:" << resolution << "Frame Rate:" << frameRate;
+    }
+}
 

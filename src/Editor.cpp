@@ -7,7 +7,7 @@
 #include <QDir>
 
 
-bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile) {
+bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &outputFile, const QString &resolution, int frameRate) {
     if (inputVideos.isEmpty()) {
         qWarning() << "No input videos provided.";
         return false;
@@ -20,7 +20,7 @@ bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &o
         qDebug() << "Normalizing video:" << inputFile;
         QString normalizedFile = QDir::temp().absoluteFilePath(QString("normalized_%1.mp4").arg(i));
 
-        if (!normalizeVideo(inputFile, normalizedFile, "1280:720", 30, "libx264", "aac", 48000, 2)) {
+        if (!normalizeVideo(inputFile, normalizedFile, resolution, frameRate, "libx264", "aac", 48000, 2)) {
             return false;
         }
 
@@ -44,14 +44,14 @@ bool Editor::combineVideos(const QList<VideoData> &inputVideos, const QString &o
     combineArgs << "-f" << "concat"
             << "-safe" << "0"
             << "-i" << tempFile
-            << "-vf" << "scale=1280:720"
             << "-c:v" << "libx264"
             << "-preset" << "fast"
             << "-c:a" << "aac"
-            << "-r" << "30"
+            << "-r" << QString::number(frameRate)
             << "-ar" << "48000"
             << "-ac" << "2"
             << outputFile;
+
 
     QProcess combineProcess;
     combineProcess.start("ffmpeg", combineArgs);
