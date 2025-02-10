@@ -45,12 +45,8 @@ private slots:
     void on_volumeChangeSlider_valueChanged(int value);
     void on_playPauseButton_clicked();
     void on_actionExport_triggered();
-
-
     void on_actionExport_options_triggered();
-
     void on_actionSave_Project_triggered();
-
     void on_actionOpen_Project_triggered();
 
 private:
@@ -63,10 +59,14 @@ private:
     Editor *editor;
 
     bool isSliderBeingMoved = false;
+    bool isProjectSaved;
     float previousVolume;
 
     void updateVideoTimeSlider();
     void updateDurationLabel();
     void setupShortcuts();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 #endif // MAINWINDOW_H

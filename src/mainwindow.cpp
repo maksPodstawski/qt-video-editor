@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     , timeLine(new TimeLine(this))
     , editor(new Editor)
     , options(new Options)
+    , isProjectSaved(true)
 {
     ui->setupUi(this);
 
@@ -71,10 +72,16 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     connect(videoTable, &VideoTable::videoRemoved, timeLine, &TimeLine::removeVideoObjects);
-
     connect(timeLine, &TimeLine::resetVideoPlayer, videoPreviewWidget, &VideoPreview::resetVideoPlayer);
+    connect(videoPreviewWidget, &VideoPreview::playbackFinished, this, [this]() {
+    ui->playPauseButton->setText("Play");
+    });
 
-    
+    connect(timeLine, &TimeLine::timelineModified, this, [this]() {
+        isProjectSaved = false;
+    });
+
+
     setupShortcuts();
 }
 
@@ -86,6 +93,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_playPauseButton_clicked()
 {
+    if (timeLine->getVideoList().isEmpty()) {
+        QMessageBox::warning(this, "Warning", "No videos on the timeline.");
+        return;
+    }
+
     if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PlayingState) {
         videoPreviewWidget->pause();
         ui->playPauseButton->setText("Play");
@@ -134,8 +146,6 @@ void MainWindow::updateDurationLabel()
     }
 }
 
-
-
 void MainWindow::updateVideoTimeSlider() {
     if (videoPreviewWidget->getDuration() > 0) {
         qint64 currentPosition = videoPreviewWidget->getPosition();
@@ -153,8 +163,8 @@ void MainWindow::on_actionOpen_triggered()
     if (!fileNames.isEmpty()) {
         QList<QString> videoFiles = fileNames.toVector().toList();
         positionUpdateTimer->start(1000);
-
         videoTable->updateTable(videoFiles);
+        isProjectSaved = false;
     }
 }
 
@@ -178,6 +188,100 @@ void MainWindow::on_actionExport_triggered()
             }
         });
         combiner->start();
+    }
+}
+
+void MainWindow::on_actionExport_options_triggered()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Export Options"));
+
+    QFormLayout form(&dialog);
+
+    QLineEdit *resolutionEdit = new QLineEdit(&dialog);
+    resolutionEdit->setText(options->getResolution());
+    form.addRow(new QLabel(tr("Resolution (e.g., 1280:720):")), resolutionEdit);
+
+    QSpinBox *frameRateSpinBox = new QSpinBox(&dialog);
+    frameRateSpinBox->setRange(1, 120);
+    frameRateSpinBox->setValue(options->getFrameRate());
+    form.addRow(new QLabel(tr("Frame Rate (fps):")), frameRateSpinBox);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    form.addRow(&buttonBox);
+
+    connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString resolution = resolutionEdit->text();
+        int frameRate = frameRateSpinBox->value();
+        options->setResolution(resolution);
+        options->setFrameRate(frameRate);
+        qDebug() << "Resolution:" << resolution << "Frame Rate:" << frameRate;
+    }
+}
+
+
+void MainWindow::on_actionSave_Project_triggered()
+{
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Save Project"), "", tr("JSON Files (*.json)"));
+    if (!filePath.isEmpty()) {
+        QList<VideoData> timelineVideos = timeLine->getVideoList();
+        QList<QString> videoLibrary = videoTable->getLoadedVideos();
+
+        ProjectSaver saver(timelineVideos, videoLibrary, filePath);
+        if (saver.saveProject()) {
+            QMessageBox::information(this, tr("Success"), tr("Project saved successfully."));
+            isProjectSaved = true;
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to save project."));
+        }
+    }
+}
+
+
+void MainWindow::on_actionOpen_Project_triggered()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("JSON Files (*.json)"));
+    if (!filePath.isEmpty()) {
+        ProjectLoader loader(filePath);
+        QList<VideoData> timelineVideos;
+        QList<QString> videoLibrary;
+        if (loader.loadProject(timelineVideos, videoLibrary))
+        {
+            timeLine->setVideoList(timelineVideos);
+            videoTable->updateTable(videoLibrary);
+            QMessageBox::information(this, tr("Success"), tr("Project loaded successfully."));
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to load project."));
+        }
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (isProjectSaved) {
+        event->accept();
+        return;
+    }
+
+    QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Close Program",
+        tr("Do you want to save changes before closing?\n"),
+        QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+        QMessageBox::Yes);
+
+    if (resBtn == QMessageBox::Yes) {
+        on_actionSave_Project_triggered();
+        if (isProjectSaved) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
+    } else if (resBtn == QMessageBox::No) {
+        event->accept();
+    } else {
+        event->ignore();
     }
 }
 
@@ -218,74 +322,3 @@ void MainWindow::setupShortcuts()
     connect(pauseShortcut, &QShortcut::activated, this, &MainWindow::on_playPauseButton_clicked);
 
 }
-
-
-
-void MainWindow::on_actionExport_options_triggered()
-{
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Export Options"));
-
-    QFormLayout form(&dialog);
-
-    QLineEdit *resolutionEdit = new QLineEdit(&dialog);
-    resolutionEdit->setText(options->getResolution());
-    form.addRow(new QLabel(tr("Resolution (e.g., 1280:720):")), resolutionEdit);
-
-    QSpinBox *frameRateSpinBox = new QSpinBox(&dialog);
-    frameRateSpinBox->setRange(1, 120);
-    frameRateSpinBox->setValue(options->getFrameRate());
-    form.addRow(new QLabel(tr("Frame Rate (fps):")), frameRateSpinBox);
-
-    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
-    form.addRow(&buttonBox);
-
-    connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-    if (dialog.exec() == QDialog::Accepted) {
-        QString resolution = resolutionEdit->text();
-        int frameRate = frameRateSpinBox->value();
-        options->setResolution(resolution);
-        options->setFrameRate(frameRate);
-        qDebug() << "Resolution:" << resolution << "Frame Rate:" << frameRate;
-    }
-}
-
-
-void MainWindow::on_actionSave_Project_triggered()
-{
-    QString filePath = QFileDialog::getSaveFileName(this, tr("Save Project"), "", tr("JSON Files (*.json)"));
-    if (!filePath.isEmpty()) {
-
-        QList<VideoData> timelineVideos = timeLine->getVideoList();
-        QList<QString> videoLibrary = videoTable->getLoadedVideos();
-
-        ProjectSaver saver(timelineVideos, videoLibrary, filePath);
-        if (saver.saveProject()) {
-            QMessageBox::information(this, tr("Success"), tr("Project saved successfully."));
-        } else {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to save project."));
-        }
-    }
-}
-
-
-void MainWindow::on_actionOpen_Project_triggered()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("JSON Files (*.json)"));
-    if (!filePath.isEmpty()) {
-        ProjectLoader loader(filePath);
-        QList<VideoData> timelineVideos;
-        QList<QString> videoLibrary;
-        if (loader.loadProject(timelineVideos, videoLibrary))
-        {
-            timeLine->setVideoList(timelineVideos);
-            videoTable->updateTable(videoLibrary);
-            QMessageBox::information(this, tr("Success"), tr("Project loaded successfully."));
-        } else {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to load project."));
-        }
-    }
-}
-

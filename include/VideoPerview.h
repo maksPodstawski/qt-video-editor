@@ -37,7 +37,7 @@ public:
 
     signals:
     void playPauseButtonTextChanged(const QString &text);
-
+    void playbackFinished();
 
 public slots:
     void resetVideoPlayer();

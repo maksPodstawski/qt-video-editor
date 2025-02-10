@@ -35,7 +35,7 @@ TimeLine::TimeLine(QWidget *parent)
         const VideoData *currentVideo = getCurrentIndicatorVideo();
         if (currentVideo) {
             qDebug() << "Cutting RIGHT video at indicator position.";
-            trimVideoAtIndicator();
+            cutRightVideoAtIndicator();
         }
     });
 
@@ -56,7 +56,23 @@ TimeLine::TimeLine(QWidget *parent)
     });
 }
 
+void TimeLine::setupShortcuts()
+{
+    QShortcut *undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+    connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
 
+    QShortcut *copyShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    connect(copyShortcut, &QShortcut::activated, this, &TimeLine::copySelectedVideo);
+
+    QShortcut *pasteShortcut = new QShortcut(QKeySequence("Ctrl+V"), this);
+    connect(pasteShortcut, &QShortcut::activated, this, &TimeLine::pasteCopiedVideo);
+
+    QShortcut *cutShortcut = new QShortcut(QKeySequence("Ctrl+X"), this);
+    connect(cutShortcut, &QShortcut::activated, this, &TimeLine::cutSelectedVideo);
+
+    QShortcut *deleteShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+    connect(deleteShortcut, &QShortcut::activated, this, &TimeLine::deleteSelectedVideo);
+}
 
 void TimeLine::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
@@ -227,6 +243,7 @@ void TimeLine::mouseReleaseEvent(QMouseEvent *event) {
         qDebug() << "Film released at position: " << rect;
         saveState();
         update();
+        emit timelineModified();
     }
     qDebug() << getVideoDurationTime();
 }
@@ -328,24 +345,6 @@ void TimeLine::undoState() {
     }
 }
 
-void TimeLine::setupShortcuts()
-{
-    QShortcut *undoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
-    connect(undoShortcut, &QShortcut::activated, this, &TimeLine::undoState);
-
-    QShortcut *copyShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
-    connect(copyShortcut, &QShortcut::activated, this, &TimeLine::copySelectedVideo);
-
-    QShortcut *pasteShortcut = new QShortcut(QKeySequence("Ctrl+V"), this);
-    connect(pasteShortcut, &QShortcut::activated, this, &TimeLine::pasteCopiedVideo);
-
-    QShortcut *cutShortcut = new QShortcut(QKeySequence("Ctrl+X"), this);
-    connect(cutShortcut, &QShortcut::activated, this, &TimeLine::cutSelectedVideo);
-
-    QShortcut *deleteShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
-    connect(deleteShortcut, &QShortcut::activated, this, &TimeLine::deleteSelectedVideo);
-}
-
 void TimeLine::copySelectedVideo() {
     QPoint cursorPos = mapFromGlobal(QCursor::pos());
     for (const VideoData &video : videoList) {
@@ -353,6 +352,7 @@ void TimeLine::copySelectedVideo() {
             copiedVideo = video;
             cutInProgress = false;
             qDebug() << "Video copied: " << copiedVideo->getTitle();
+            emit timelineModified();
             return;
         }
     }
@@ -379,6 +379,7 @@ void TimeLine::pasteCopiedVideo() {
             copiedVideo.reset();
             cutInProgress = false;
         }
+        emit timelineModified();
     }
 }
 
@@ -389,6 +390,7 @@ void TimeLine::cutSelectedVideo() {
             cutVideo(it);
             saveState();
             update();
+            emit timelineModified();
             return;
         }
     }
@@ -403,6 +405,7 @@ void TimeLine::deleteSelectedVideo() {
             videoList.erase(it);
             saveState();
             update();
+            emit timelineModified();
             return;
         }
     }
@@ -476,6 +479,7 @@ void TimeLine::removeVideoObjects(const QString &filePath) {
     }
     saveState();
     update();
+    emit timelineModified();
 }
 
 QList<VideoData> TimeLine::getVideoList() const {
@@ -580,6 +584,7 @@ void TimeLine::cutVideoAtIndicator(bool cutLeft) {
     }
 
     emit resetVideoPlayer();
+    emit timelineModified();
 
     for (VideoData& video : videoList) {
         if (video.getOperations().length() > 0) {
@@ -592,7 +597,7 @@ void TimeLine::cutLeftVideoAtIndicator() {
     cutVideoAtIndicator(true);
 }
 
-void TimeLine::trimVideoAtIndicator() {
+void TimeLine::cutRightVideoAtIndicator() {
     cutVideoAtIndicator(false);
 }
 
@@ -623,5 +628,6 @@ void TimeLine::splitVideoAtIndicator() {
     }
 
     emit resetVideoPlayer();
+    emit timelineModified();
 }
 

@@ -234,25 +234,32 @@ void VideoPreview::updatePlayer()
     });
 }
 
-void VideoPreview::onIndicatorPositionChanged() {
+void VideoPreview::onIndicatorPositionChanged()
+{
     const auto &videoList = timeLine->getVideoList();
     if (videoList.isEmpty()) {
         qWarning() << "No videos to stop.";
         return;
     }
     const VideoData *currentVideo = timeLine->getCurrentIndicatorVideo();
-    this->currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
+    if(currentVideo)
+    {
+        this->currentVideoIndex = timeLine->getCurrentVideoIndexIndicator();
 
-    this->mediaPlayer->setSource(QUrl::fromLocalFile(currentVideo->getFilePath()));
-    qreal startTime, endTime;
-    determineStartEndTimes(*currentVideo, startTime, endTime);
+        if(mediaPlayer->source() != QUrl::fromLocalFile(currentVideo->getFilePath())) {
+            this->mediaPlayer->setSource(QUrl::fromLocalFile(currentVideo->getFilePath()));
+        }
 
-    int indicatorX = timeLine->indicator->x();
-    int startX = currentVideo->getRect().left();
-    double timePerUnit = timeLine->getTimePerUnit();
-    qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+        qreal startTime, endTime;
+        determineStartEndTimes(*currentVideo, startTime, endTime);
 
-    m_iVideoPosition = static_cast<qint64>(newPosition);
+        int indicatorX = timeLine->indicator->x();
+        int startX = currentVideo->getRect().left();
+        double timePerUnit = timeLine->getTimePerUnit();
+        qreal newPosition = (indicatorX - startX) * timePerUnit + startTime * 1000;
+
+        m_iVideoPosition = static_cast<qint64>(newPosition);
+    }
 }
 
 void VideoPreview::playNextVideo() {
@@ -266,6 +273,7 @@ void VideoPreview::playNextVideo() {
         currentVideoIndex = 0;
         updatePlayer();
         mediaPlayer->setPosition(0);
+        emit playbackFinished();
     }
 }
 

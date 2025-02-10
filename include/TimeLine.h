@@ -38,6 +38,7 @@ public:
 
     signals:
     void resetVideoPlayer();
+    void timelineModified();
 
 public slots:
     void removeVideoObjects(const QString &filePath);
@@ -90,7 +91,7 @@ private:
     void deleteSelectedVideo();
     void cutVideo(QList<VideoData>::iterator i);
 
-    void trimVideoAtIndicator();
+    void cutRightVideoAtIndicator();
     void cutLeftVideoAtIndicator();
     void splitVideoAtIndicator();
 
