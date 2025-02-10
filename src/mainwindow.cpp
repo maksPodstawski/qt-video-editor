@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     , isProjectSaved(true)
 {
     ui->setupUi(this);
-
+    this->setWindowTitle("Video Editor");
     this->videoPreviewWidget = new VideoPreview(this->timeLine, this);
 
 

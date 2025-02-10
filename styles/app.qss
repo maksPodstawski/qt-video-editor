@@ -1,0 +1,91 @@
+QWidget {
+
+}
+
+QGroupBox {
+    border: none;
+}
+
+QTableView {
+
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: #d46e08;
+    font-weight: bold;
+    color: #fff;
+    padding: 5px;
+    border: none;
+}
+
+
+QTabWidget {
+    border: none;
+    color: #fff;
+}
+
+QScrollArea {
+    border: none;
+}
+
+QPushButton {
+    border-radius: 10px;
+    background-color: #d46e08; /* Kolor tła */
+    color: #FFFFFF; /* Kolor tekstu */
+    font-weight: bold; /* Pogrubienie czcionki */
+    padding: 5px 10px; /* Wewnętrzne odstępy */
+}
+
+/******** Qslider Vertical ********/
+
+QSlider::groove:vertical {
+    border: 1px solid #bbb;
+    background: grey;
+    width: 6px;
+    border-radius: 2px;
+}
+
+QSlider::sub-page:vertical {
+    background: #5bbdea;
+    border: 1px solid #777;
+    width: 10px;
+    border-radius: 4px;
+}
+
+QSlider::handle:vertical {
+    background: #ced7d9;
+    border: 1px solid #777;
+    height: 10px;
+    margin-right: -5px;
+    margin-left: -5px;
+    margin-top: -1px;
+    border-radius: -5px;
+}
+
+QSlider::handle:vertical:hover {
+    background: white;
+    border: 1px solid #444;
+    width: 13px;
+    margin-top: -5px;
+    margin-bottom: -3px;
+    border-radius: 7px;
+}
+
+QLCDNumber
+{
+    background-color: #2B2D30;
+
+}
+
+QMenuBar {
+    background-color: #d46e08;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+QMenu {
+    background-color: #964d05;
+    color: #FFFFFF;
+}
+

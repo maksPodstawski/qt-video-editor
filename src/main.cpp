@@ -1,13 +1,19 @@
 #include "../include/mainwindow.h"
-
 #include <QApplication>
+#include <QFile>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    QLocale::setDefault(QLocale(QLocale::Polish, QLocale::Poland));
-    a.setStyle("Fusion");
+    QApplication app(argc, argv);
     MainWindow w;
+
+    QFile styleFile("../../styles/app.qss");
+    styleFile.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(styleFile.readAll());
+
+    app.setStyleSheet(styleSheet);
+
     w.show();
-    return a.exec();
+    return app.exec();
 }
+
