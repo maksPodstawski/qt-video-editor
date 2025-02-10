@@ -41,7 +41,6 @@ public:
     QPushButton *muteButton;
     QLCDNumber *volumeLCD;
     QLabel *timeLabel;
-    QSlider *previewVideoTimeSlider;
     QGroupBox *groupBoxVideosTable;
     QScrollArea *timeLineScrollArea;
     QWidget *scrollAreaWidgetContents;
@@ -97,12 +96,6 @@ public:
         font.setPointSize(12);
         font.setBold(true);
         timeLabel->setFont(font);
-        previewVideoTimeSlider = new QSlider(centralwidget);
-        previewVideoTimeSlider->setObjectName("previewVideoTimeSlider");
-        previewVideoTimeSlider->setGeometry(QRect(430, 410, 701, 31));
-        previewVideoTimeSlider->setStyleSheet(QString::fromUtf8(""));
-        previewVideoTimeSlider->setOrientation(Qt::Orientation::Horizontal);
-        previewVideoTimeSlider->setTickPosition(QSlider::TickPosition::NoTicks);
         groupBoxVideosTable = new QGroupBox(centralwidget);
         groupBoxVideosTable->setObjectName("groupBoxVideosTable");
         groupBoxVideosTable->setGeometry(QRect(30, 30, 371, 371));

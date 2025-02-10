@@ -11,7 +11,8 @@
 #include "VideoTable.h"
 #include "Options.h"
 
-class ProjectSaver {
+class ProjectSaver
+{
 public:
     ProjectSaver(const QList<VideoData>& videoList, const QList<QString>& loadedFilms, const QString& filePath);
     bool saveProject() const;

@@ -7,13 +7,12 @@
 class Caretaker
 {
 public:
+    Memento getMemento(int index) const;
 
     void clearMementosAfter(int index);
-    void addMemento(const Memento &memento);
-    Memento getMemento(int index) const;
+    void addMemento(const Memento& memento);
 
 private:
     std::vector<Memento> mementos;
 };
-
 #endif // CARETAKER_H

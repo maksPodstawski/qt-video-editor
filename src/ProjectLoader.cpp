@@ -1,12 +1,17 @@
 #include "../include/ProjectLoader.h"
 
+#include "../include/CutRightOperation.h"
+
 ProjectLoader::ProjectLoader(const QString& filePath)
-    : filePath(filePath) {}
+    : filePath(filePath)
+{
+}
 
 bool ProjectLoader::loadProject(QList<VideoData>& timelineVideos, QList<QString>& videoLibrary) const
 {
     QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly))
+    {
         return false;
     }
 
@@ -16,13 +21,15 @@ bool ProjectLoader::loadProject(QList<VideoData>& timelineVideos, QList<QString>
 
 
     QJsonArray timelineArray = projectObject["timelineVideos"].toArray();
-    for (const QJsonValue& value : timelineArray) {
+    for (const QJsonValue& value : timelineArray)
+    {
         timelineVideos.append(deserializeVideo(value.toObject()));
     }
 
 
     QJsonArray libraryArray = projectObject["videoLibrary"].toArray();
-    for (const QJsonValue& value : libraryArray) {
+    for (const QJsonValue& value : libraryArray)
+    {
         QJsonObject filmObject = value.toObject();
         QString filmPath = filmObject["path"].toString();
         videoLibrary.append(filmPath);
@@ -47,5 +54,31 @@ VideoData ProjectLoader::deserializeVideo(const QJsonObject& jsonObject) const
     video.setStartTime(jsonObject["startTime"].toDouble());
     video.setEndTime(jsonObject["endTime"].toDouble());
     video.setRect(rect);
+
+    QJsonArray operationsArray = jsonObject["operations"].toArray();
+    for (const QJsonValue& value : operationsArray)
+    {
+        video.addOperation(deserializeOperation(value.toObject()));
+    }
+
     return video;
+}
+
+Operation* ProjectLoader::deserializeOperation(const QJsonObject& jsonObject) const
+{
+    QString type = jsonObject["type"].toString();
+    QString filePath = jsonObject["filePath"].toString();
+    double operationTime = jsonObject["operationTime"].toDouble();
+
+    if (type == "CutLeft")
+    {
+        return new CutLeftOperation(filePath, operationTime);
+    }
+    else if (type == "CutRight")
+    {
+        return new CutRightOperation(filePath, operationTime);
+    }
+
+
+    return nullptr;
 }

@@ -1,7 +1,8 @@
 #include "../include/VideoData.h"
 #include "QTime"
 
-VideoData::VideoData(const QString &title, const QString &duration, const QString &filePath, const QString &extension, const QRect &initialRect)
+VideoData::VideoData(const QString& title, const QString& duration, const QString& filePath, const QString& extension,
+                     const QRect& initialRect)
     : title(title), duration(duration), filePath(filePath), extension(extension), rect(initialRect)
 {
     startTime = 0;
@@ -9,77 +10,110 @@ VideoData::VideoData(const QString &title, const QString &duration, const QStrin
     color = generateRandomColor();
 }
 
-void VideoData::setFilePath(const QString &filePath) {
+VideoData::VideoData() : title(""), duration(""), filePath(""), extension(""), rect(QRect()),
+                         color(generateRandomColor())
+{
+}
+
+void VideoData::setFilePath(const QString& filePath)
+{
     this->filePath = filePath;
 }
 
-void VideoData::setTitle(const QString &title) {
+void VideoData::setTitle(const QString& title)
+{
     this->title = title;
 }
 
-void VideoData::setDuration(const QString &duration) {
+void VideoData::setDuration(const QString& duration)
+{
     this->duration = duration;
 }
 
-void VideoData::setExtension(const QString &extension) {
+void VideoData::setExtension(const QString& extension)
+{
     this->extension = extension;
 }
 
-void VideoData::setRect(const QRect &rect) {
+void VideoData::setRect(const QRect& rect)
+{
     this->rect = rect;
 }
 
-void VideoData::setStartTime(qreal startTime) {
+void VideoData::setStartTime(qreal startTime)
+{
     this->startTime = startTime;
 }
 
-void VideoData::setEndTime(qreal endTime) {
+void VideoData::setEndTime(qreal endTime)
+{
     this->endTime = endTime;
 }
 
-void VideoData::setColor(const QColor& color) {
+void VideoData::setColor(const QColor& color)
+{
     this->color = color;
 }
 
-QString VideoData::getTitle() const {
+QString VideoData::getTitle() const
+{
     return title;
 }
 
-QString VideoData::getDuration() const {
+QString VideoData::getDuration() const
+{
     return duration;
 }
 
-QString VideoData::getExtension() const {
+QString VideoData::getExtension() const
+{
     return extension;
 }
 
-QString VideoData::getFilePath() const {
+QString VideoData::getFilePath() const
+{
     return filePath;
 }
 
-QColor VideoData::getColor() const {
+QColor VideoData::getColor() const
+{
     return color;
 }
 
-QRect VideoData::getRect() const {
+QRect VideoData::getRect() const
+{
     return rect;
 }
 
-QColor VideoData::generateRandomColor() {
+QColor VideoData::generateRandomColor()
+{
     return QColor::fromRgb(rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100);
 }
 
-void VideoData::addOperation(Operation *operation) {
+void VideoData::addOperation(Operation* operation)
+{
     operations.append(operation);
 }
 
-void VideoData::executeOperations() {
-    for (Operation *operation: operations) {
+void VideoData::executeOperations()
+{
+    for (Operation* operation : operations)
+    {
         this->filePath = operation->execute();
     }
 }
 
-QList<Operation *> VideoData::getOperations() const {
+QList<Operation*> VideoData::getOperations() const
+{
     return this->operations;
 }
 
+qreal VideoData::getStartTime() const
+{
+    return this->startTime;
+}
+
+qreal VideoData::getEndTime() const
+{
+    return this->endTime;
+}

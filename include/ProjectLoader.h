@@ -8,8 +8,11 @@
 #include <QJsonDocument>
 #include <QFile>
 #include "VideoData.h"
+#include "CutLeftOperation.h"
+#include "CutRightOperation.h"
 
-class ProjectLoader {
+class ProjectLoader
+{
 public:
     ProjectLoader(const QString& filePath);
 
@@ -17,6 +20,7 @@ public:
 
 private:
     VideoData deserializeVideo(const QJsonObject& jsonObject) const;
+    Operation* deserializeOperation(const QJsonObject& jsonObject) const;
 
     QString filePath;
 };

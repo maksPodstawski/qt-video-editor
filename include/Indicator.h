@@ -1,27 +1,25 @@
-//
-// Created by czest on 06.01.2025.
-//
-
 #ifndef VIDEO_EDITOR_INDICATOR_H
 #define VIDEO_EDITOR_INDICATOR_H
 
-
 #include <QWidget>
 #include <QMenu>
+#include <QPainter>
+#include <QMouseEvent>
 
 class Indicator : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
+
 public:
-    explicit Indicator(QWidget *parent = nullptr);
+    explicit Indicator(QWidget* parent = nullptr);
     QPointF getPosition() const;
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
 private:
     bool dragging;

@@ -36,32 +36,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timeLineScrollArea->setLayout(new QVBoxLayout);
     ui->timeLineScrollArea->layout()->addWidget(scrollArea);
 
-    ui->previewVideoTimeSlider->setRange(0, 100);
-    ui->previewVideoTimeSlider->setValue(0);
+
     positionUpdateTimer = new QTimer(this);
-
-
-    connect(positionUpdateTimer, &QTimer::timeout, this, &MainWindow::updateVideoTimeSlider);
-
-    connect(ui->previewVideoTimeSlider, &QSlider::sliderPressed, this, [this]() {
-        isSliderBeingMoved = true;
-    });
-
-    connect(ui->previewVideoTimeSlider, &QSlider::valueChanged, this, [this](qint64 position) {
-        if(isSliderBeingMoved) videoPreviewWidget->setPosition(position * videoPreviewWidget->getDuration() / 100);
-    });
-
-    connect(ui->previewVideoTimeSlider, &QSlider::sliderReleased, this, [this]() {
-        isSliderBeingMoved = false;
-
-        qint64 duration = videoPreviewWidget->getDuration();
-        videoPreviewWidget->setPosition(
-            ui->previewVideoTimeSlider->value() * duration / 100
-            );
-    });
+    positionUpdateTimer->start(1000);
 
     ui->volumeChangeSlider->setRange(0, 100);
     ui->volumeChangeSlider->setValue(50);
+
     connect(ui->volumeChangeSlider, &QSlider::valueChanged, this, [this](int value) {
         videoPreviewWidget->setVolume(value / 100.0);
     });
@@ -136,23 +117,10 @@ void MainWindow::on_muteButton_clicked()
 
 void MainWindow::updateDurationLabel()
 {
-    if (videoPreviewWidget->getDuration() > 0) {
-        qint64 currentPosition = videoPreviewWidget->getPosition();
-        qint64 duration = videoPreviewWidget->getDuration();
-
-        QTime currentTime = QTime::fromMSecsSinceStartOfDay(currentPosition);
-        QTime totalTime = QTime::fromMSecsSinceStartOfDay(duration);
-        ui->timeLabel->setText(currentTime.toString("hh:mm:ss") + " / " + totalTime.toString("hh:mm:ss"));
-    }
-}
-
-void MainWindow::updateVideoTimeSlider() {
-    if (videoPreviewWidget->getDuration() > 0) {
-        qint64 currentPosition = videoPreviewWidget->getPosition();
-        qint64 duration = videoPreviewWidget->getDuration();
-        int sliderPosition = (currentPosition * 100) / duration;
-
-        ui->previewVideoTimeSlider->setValue(sliderPosition);
+    if (!timeLine->getVideoList().isEmpty())
+    {
+        QTime totalTime = QTime::fromMSecsSinceStartOfDay(timeLine->getTotalVideosDurationTime());
+        ui->timeLabel->setText(totalTime.toString("hh:mm:ss"));
     }
 }
 
@@ -162,7 +130,6 @@ void MainWindow::on_actionOpen_triggered()
         tr("Video and Audio Files (*.mp4 *.avi *.mov *.mp3 *.wav *.flac)"));
     if (!fileNames.isEmpty()) {
         QList<QString> videoFiles = fileNames.toVector().toList();
-        positionUpdateTimer->start(1000);
         videoTable->updateTable(videoFiles);
         isProjectSaved = false;
     }

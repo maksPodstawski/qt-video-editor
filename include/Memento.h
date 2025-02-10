@@ -7,7 +7,7 @@
 class Memento
 {
 public:
-    Memento(const QList<VideoData> &state);
+    Memento(const QList<VideoData>& state);
     QList<VideoData> getState() const;
 
 private:

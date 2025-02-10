@@ -27,8 +27,6 @@ add_executable(video_editor
         include/TimeLine.h
         src/VideoData.cpp
         include/VideoData.h
-        src/AudioData.cpp
-        include/AudioData.h
         include/Memento.h
         include/Originator.h
         include/Caretaker.h

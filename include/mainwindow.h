@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "../ui/ui_mainwindow.h"
-#include "AudioData.h"
 #include "VideoData.h"
 #include "VideoPerview.h"
 #include "VideoTable.h"
@@ -25,9 +24,12 @@
 
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
+
+namespace Ui
+{
+    class MainWindow;
 }
+
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -35,11 +37,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
 private slots:
-
     void on_actionOpen_triggered();
     void on_muteButton_clicked();
     void on_volumeChangeSlider_valueChanged(int value);
@@ -50,23 +51,22 @@ private slots:
     void on_actionOpen_Project_triggered();
 
 private:
-    Ui::MainWindow *ui;
-    Options *options;
-    VideoPreview *videoPreviewWidget;
-    VideoTable *videoTable;
-    TimeLine *timeLine;
-    QTimer *positionUpdateTimer;
-    Editor *editor;
+    Ui::MainWindow* ui;
+    Options* options;
+    VideoPreview* videoPreviewWidget;
+    VideoTable* videoTable;
+    TimeLine* timeLine;
+    QTimer* positionUpdateTimer;
+    Editor* editor;
 
     bool isSliderBeingMoved = false;
     bool isProjectSaved;
     float previousVolume;
 
-    void updateVideoTimeSlider();
     void updateDurationLabel();
     void setupShortcuts();
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent* event) override;
 };
 #endif // MAINWINDOW_H

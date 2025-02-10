@@ -1,10 +1,5 @@
-//
-// Created by czest on 16.12.2024.
-//
-
 #ifndef VIDEO_EDITOR_VIDEOCOMBINER_H
 #define VIDEO_EDITOR_VIDEOCOMBINER_H
-
 
 #include <QThread>
 #include <QObject>
@@ -14,20 +9,17 @@
 
 class VideoCombiner : public QThread
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    VideoCombiner(const QList<VideoData> &inputVideos, const QString &outputFileName, const QString &resolution, int frameRate,QObject *parent = nullptr)
-            : QThread(parent), inputFiles(inputVideos), outputFileName(outputFileName), resolution(resolution), frameRate(frameRate) {}
+    VideoCombiner(const QList<VideoData>& inputVideos, const QString& outputFileName, const QString& resolution,
+                  int frameRate, QObject* parent = nullptr);
 
 signals:
     void combineFinished(bool success);
 
 protected:
-    void run() override {
-        bool success = Editor::combineVideos(inputFiles, outputFileName, resolution, frameRate);
-        emit combineFinished(success);
-    }
+    void run() override;
 
 private:
     QList<VideoData> inputFiles;
@@ -35,6 +27,5 @@ private:
     QString resolution;
     int frameRate;
 };
-
 
 #endif //VIDEO_EDITOR_VIDEOCOMBINER_H

@@ -8,10 +8,11 @@
 class Originator
 {
 public:
-    void setState(const QList<VideoData> &state);
-    void getStateFromMemento(const Memento &memento);
+    void setState(const QList<VideoData>& state);
+    void getStateFromMemento(const Memento& memento);
 
     QList<VideoData> getState() const;
+
     Memento saveStateToMemento();
 
 private:

@@ -24,36 +24,35 @@
 class VideoTable : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit VideoTable(QWidget *parent = nullptr);
+    explicit VideoTable(QWidget* parent = nullptr);
 
-    void updateTable(const QList<QString> &mediaFiles);
-
-
-    void deleteSelectedVideo();
     QList<QString> getLoadedVideos() const;
-    static QString getDurationText(const QString &filePath);
-    static QString getFileFormat(const QString &filePath);
+    static QString getDurationText(const QString& filePath);
+    static QString getFileFormat(const QString& filePath);
+
+    void updateTable(const QList<QString>& mediaFiles);
+    void deleteSelectedVideo();
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-
-    QTableView *tableView;
-    QStandardItemModel *tableModel;
+    QTableView* tableView;
+    QStandardItemModel* tableModel;
     QPoint dragStartPosition;
+
+    void setupShortcuts();
+    void setUpTableWidget();
+    void startDrag(const QPoint& pos);
+    void showContextMenu(const QPoint& pos);
+    void showFileInfo();
     QByteArray serializeRow(int row) const;
 
-    void setUpTableWidget();
-    void startDrag(const QPoint &pos);
-    void showContextMenu(const QPoint &pos);
-    void setupShortcuts();
-    void showFileInfo();
-
-    signals:
-    void videoRemoved(const QString &filePath);
+signals:
+    void videoRemoved(const QString& filePath);
 };
 
 #endif // VIDEOTABLE_H

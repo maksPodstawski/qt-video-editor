@@ -3,18 +3,21 @@
 #include <QString>
 
 
-class Options {
+class Options
+{
+public:
+    Options();
+
+    void setResolution(const QString& resolution);
+    void setFrameRate(int frameRate);
+
+    QString getResolution() const;
+    int getFrameRate() const;
+
 private:
     QString resolution;
     int frameRate;
-public:
-    Options(): resolution("1280:720"), frameRate(30) {};
-    void setResolution(const QString &resolution);
-    void setFrameRate(int frameRate);
-    QString getResolution() const;
-    int getFrameRate() const;
 };
-
 
 
 #endif //OPTIONS_H

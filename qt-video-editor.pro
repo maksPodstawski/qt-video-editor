@@ -9,7 +9,6 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    src/AudioData.cpp \
     src/TimeLine.cpp \
     src/VideoData.cpp \
     src/VideoPerview.cpp \
@@ -19,7 +18,6 @@ SOURCES += \
 
 
 HEADERS += \
-    include/AudioData.h \
     include/TimeLine.h \
     include/VideoData.h \
     include/VideoPerview.h \
