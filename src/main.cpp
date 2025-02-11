@@ -6,6 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     MainWindow w;
+    w.setWindowIcon(QIcon("../../resources/icons/programicon.png"));
 
     QFile styleFile("../../styles/app.qss");
     styleFile.open(QFile::ReadOnly);
