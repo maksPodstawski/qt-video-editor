@@ -211,18 +211,28 @@ void MainWindow::on_actionSave_Project_triggered()
 void MainWindow::on_actionOpen_Project_triggered()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("JSON Files (*.json)"));
-    if (!filePath.isEmpty()) {
+    if (!filePath.isEmpty())
+    {
+
         ProjectLoader loader(filePath);
         QList<VideoData> timelineVideos;
         QList<QString> videoLibrary;
         if (loader.loadProject(timelineVideos, videoLibrary))
         {
+            for(const auto & timelineVideo : timelineVideos)
+            {
+                if(!QFile::exists(timelineVideo.getFilePath()))
+                {
+                    QMessageBox::critical(this, tr("Error"), tr("Failed to load project."));
+                    return;
+                }
+            }
+
             timeLine->setVideoList(timelineVideos);
             videoTable->updateTable(videoLibrary);
             QMessageBox::information(this, tr("Success"), tr("Project loaded successfully."));
-        } else {
-            QMessageBox::critical(this, tr("Error"), tr("Failed to load project."));
         }
+
     }
 }
 
