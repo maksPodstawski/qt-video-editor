@@ -57,7 +57,6 @@ private:
     VideoTable* videoTable;
     TimeLine* timeLine;
     QTimer* positionUpdateTimer;
-    Editor* editor;
 
     bool isSliderBeingMoved = false;
     bool isProjectSaved;
