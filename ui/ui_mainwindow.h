@@ -14,7 +14,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLCDNumber>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
@@ -22,7 +21,6 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QSlider>
-#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -43,14 +41,13 @@ public:
     QGroupBox *groupBoxVideosTable;
     QScrollArea *timeLineScrollArea;
     QWidget *scrollAreaWidgetContents;
-    QWidget *widget;
+    QWidget *layoutWidget;
     QHBoxLayout *horizontalLayout;
     QSlider *volumeChangeSlider;
     QVBoxLayout *verticalLayout_3;
     QPushButton *playPauseButton;
-    QSpacerItem *verticalSpacer;
     QVBoxLayout *verticalLayout_2;
-    QLCDNumber *volumeLCD;
+    QLabel *volumeLabel;
     QPushButton *muteButton;
     QMenuBar *menubar;
     QMenu *menuFile;
@@ -62,6 +59,12 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
         MainWindow->resize(1299, 747);
+        QSizePolicy sizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
+        sizePolicy.setHorizontalStretch(2);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(MainWindow->sizePolicy().hasHeightForWidth());
+        MainWindow->setSizePolicy(sizePolicy);
+        MainWindow->setMinimumSize(QSize(0, 0));
         actionOpen = new QAction(MainWindow);
         actionOpen->setObjectName("actionOpen");
         actionExport = new QAction(MainWindow);
@@ -79,30 +82,30 @@ public:
         groupBoxVideo->setGeometry(QRect(400, 30, 751, 371));
         timeLabel = new QLabel(centralwidget);
         timeLabel->setObjectName("timeLabel");
-        timeLabel->setGeometry(QRect(1080, 430, 62, 21));
+        timeLabel->setGeometry(QRect(20, 430, 1251, 21));
         QFont font;
         font.setPointSize(12);
         font.setBold(true);
         timeLabel->setFont(font);
-        timeLabel->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+        timeLabel->setAlignment(Qt::AlignmentFlag::AlignCenter);
         groupBoxVideosTable = new QGroupBox(centralwidget);
         groupBoxVideosTable->setObjectName("groupBoxVideosTable");
         groupBoxVideosTable->setGeometry(QRect(20, 30, 371, 371));
         timeLineScrollArea = new QScrollArea(centralwidget);
         timeLineScrollArea->setObjectName("timeLineScrollArea");
-        timeLineScrollArea->setGeometry(QRect(20, 460, 1251, 241));
+        timeLineScrollArea->setGeometry(QRect(20, 460, 1250, 200));
         timeLineScrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1249, 239));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1250, 200));
         timeLineScrollArea->setWidget(scrollAreaWidgetContents);
-        widget = new QWidget(centralwidget);
-        widget->setObjectName("widget");
-        widget->setGeometry(QRect(1170, 160, 107, 135));
-        horizontalLayout = new QHBoxLayout(widget);
+        layoutWidget = new QWidget(centralwidget);
+        layoutWidget->setObjectName("layoutWidget");
+        layoutWidget->setGeometry(QRect(1170, 160, 107, 135));
+        horizontalLayout = new QHBoxLayout(layoutWidget);
         horizontalLayout->setObjectName("horizontalLayout");
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        volumeChangeSlider = new QSlider(widget);
+        volumeChangeSlider = new QSlider(layoutWidget);
         volumeChangeSlider->setObjectName("volumeChangeSlider");
         volumeChangeSlider->setStyleSheet(QString::fromUtf8(""));
         volumeChangeSlider->setOrientation(Qt::Orientation::Vertical);
@@ -111,31 +114,19 @@ public:
 
         verticalLayout_3 = new QVBoxLayout();
         verticalLayout_3->setObjectName("verticalLayout_3");
-        playPauseButton = new QPushButton(widget);
+        playPauseButton = new QPushButton(layoutWidget);
         playPauseButton->setObjectName("playPauseButton");
 
         verticalLayout_3->addWidget(playPauseButton);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Minimum);
-
-        verticalLayout_3->addItem(verticalSpacer);
-
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName("verticalLayout_2");
-        volumeLCD = new QLCDNumber(widget);
-        volumeLCD->setObjectName("volumeLCD");
-        QSizePolicy sizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Minimum);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(volumeLCD->sizePolicy().hasHeightForWidth());
-        volumeLCD->setSizePolicy(sizePolicy);
-        volumeLCD->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
-        volumeLCD->setStyleSheet(QString::fromUtf8(""));
-        volumeLCD->setSegmentStyle(QLCDNumber::SegmentStyle::Outline);
+        volumeLabel = new QLabel(layoutWidget);
+        volumeLabel->setObjectName("volumeLabel");
 
-        verticalLayout_2->addWidget(volumeLCD);
+        verticalLayout_2->addWidget(volumeLabel);
 
-        muteButton = new QPushButton(widget);
+        muteButton = new QPushButton(layoutWidget);
         muteButton->setObjectName("muteButton");
 
         verticalLayout_2->addWidget(muteButton);
@@ -196,6 +187,7 @@ public:
         timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
         groupBoxVideosTable->setTitle(QString());
         playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
+        volumeLabel->setText(QString());
         muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuOptions->setTitle(QCoreApplication::translate("MainWindow", "Options", nullptr));

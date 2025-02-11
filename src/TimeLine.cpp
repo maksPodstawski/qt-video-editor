@@ -93,7 +93,7 @@ void TimeLine::paintEvent(QPaintEvent* event)
     drawVideos(painter);
     drawTextOnVideos(painter);
 
-    painter.setPen(QPen(QColor("#d46e08"), 2));
+    painter.setPen(QPen(QColor("#3498eb"), 2));
     painter.drawLine(indicator->x(), indicator->y() + indicator->height(),
                      indicator->x(), height());
 }

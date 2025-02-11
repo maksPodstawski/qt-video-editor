@@ -11,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , videoTable(new VideoTable(this))
     , timeLine(new TimeLine(this))
-    , editor(new Editor)
     , options(new Options)
     , isProjectSaved(true)
 {
@@ -92,7 +91,7 @@ void MainWindow::on_volumeChangeSlider_valueChanged(int value)
 {
     float volume = static_cast<float>(value) / 100;
     videoPreviewWidget->setVolume(volume);
-    ui->volumeLCD->display(value);
+    ui->volumeLabel->setText(QString::number(value));
 
     if(volume > 0 && ui->muteButton->text() == "Unmute") {
         ui->muteButton->setText("Mute");

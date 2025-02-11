@@ -1,18 +1,14 @@
-QWidget {
-
-}
-
 QGroupBox {
     border: none;
 }
 
 QTableView {
-
+    background-color: #1E1F22;
     border: none;
 }
 
 QHeaderView::section {
-    background-color: #d46e08;
+    background-color: #3498eb;
     font-weight: bold;
     color: #fff;
     padding: 5px;
@@ -31,31 +27,39 @@ QScrollArea {
 
 QPushButton {
     border-radius: 10px;
-    background-color: #d46e08; /* Kolor tła */
-    color: #FFFFFF; /* Kolor tekstu */
-    font-weight: bold; /* Pogrubienie czcionki */
-    padding: 5px 10px; /* Wewnętrzne odstępy */
+    background-color: #3498eb;
+    color: #FFFFFF;
+    padding: 5px 10px;
 }
 
-/******** Qslider Vertical ********/
+QPushButton::hover
+{
+    font-weight: bold;
+}
+
+QPushButton::pressed
+{
+	background-color: #1400EB;
+
+}
 
 QSlider::groove:vertical {
     border: 1px solid #bbb;
-    background: grey;
+    background: #3498eb;
     width: 6px;
     border-radius: 2px;
 }
 
 QSlider::sub-page:vertical {
-    background: #5bbdea;
-    border: 1px solid #777;
+    background: grey;
+
     width: 10px;
     border-radius: 4px;
 }
 
 QSlider::handle:vertical {
     background: #ced7d9;
-    border: 1px solid #777;
+
     height: 10px;
     margin-right: -5px;
     margin-left: -5px;
@@ -72,20 +76,47 @@ QSlider::handle:vertical:hover {
     border-radius: 7px;
 }
 
-QLCDNumber
-{
-    background-color: #2B2D30;
-
+QMenuBar {
+    background-color: #3498eb;
+    color: #FFFFFF;
 }
 
-QMenuBar {
-    background-color: #d46e08;
+QMenuBar::item:selected {
+    background-color: #1E74EC;
     color: #FFFFFF;
     font-weight: bold;
 }
 
+QMenu::item:selected {
+    color: #FFFFFF;
+    font-weight: bold;
+    background-color: #1E74EC;
+}
+
 QMenu {
-    background-color: #964d05;
+    background-color: #3498eb;
     color: #FFFFFF;
 }
 
+QMainWindow {
+    background-color: #2B2D30;
+}
+
+QScrollArea QWidget {
+    background-color: #2B2D30;
+}
+
+QLabel#volumeLabel {
+    background-color: #2B2D30;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 5px;
+    qproperty-alignment: 'AlignCenter';
+}
+
+QLabel#timeLabel {
+    font-size: 24px;
+    font-weight: bold;
+    qproperty-alignment: 'AlignCenter';
+}

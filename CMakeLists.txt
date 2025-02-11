@@ -13,6 +13,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         Multimedia
         MultimediaWidgets
+        Test
         REQUIRED)
 
 add_executable(video_editor
@@ -95,4 +96,5 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${QT_INSTALL_PATH}/plugins/multimedia/"
             "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/multimedia/")
+
 endif ()

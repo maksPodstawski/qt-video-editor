@@ -16,9 +16,9 @@ class ProjectSaver
 public:
     ProjectSaver(const QList<VideoData>& videoList, const QList<QString>& loadedFilms, const QString& filePath);
     bool saveProject() const;
-
-private:
     QJsonObject serializeVideo(const VideoData& video) const;
+private:
+    //QJsonObject serializeVideo(const VideoData& video) const;
 
     QList<VideoData> videoList;
     QList<QString> loadedFilms;
