@@ -1,6 +1,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include <QString>
+#include <QRegularExpression>
 
 
 class Options
