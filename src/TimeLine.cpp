@@ -641,7 +641,6 @@ int TimeLine::getTotalVideosDurationTime() const
                 time += videoList[i].getEndTime() - videoList[i].getStartTime();
             }
         }
-        qDebug() << "czas : " << time;
         return time;
     }
     return 0;

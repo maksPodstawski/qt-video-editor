@@ -7,6 +7,7 @@
 #include <QList>
 #include "Editor.h"
 
+
 class VideoCombiner : public QThread
 {
     Q_OBJECT

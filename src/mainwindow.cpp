@@ -145,8 +145,16 @@ void MainWindow::on_actionExport_triggered()
             qDebug() << "Exporting video: " << video.getFilePath();
             updatedVideoList.append(video);
         }
-        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName, this->options->getResolution(), this->options->getFrameRate() ,this);
-        connect(combiner, &VideoCombiner::combineFinished, this, [this](bool success) {
+        QProgressDialog *progressDialog = new QProgressDialog("Exporting Video...", "Cancel", 0, 0, this);
+        progressDialog->setWindowModality(Qt::WindowModal);
+        progressDialog->setCancelButton(nullptr);
+        progressDialog->show();
+
+        VideoCombiner *combiner = new VideoCombiner(updatedVideoList, fileName, this->options->getResolution(), this->options->getFrameRate(), this);
+        connect(combiner, &VideoCombiner::combineFinished, this, [this, progressDialog](bool success) {
+            progressDialog->close();
+            delete progressDialog;
+
             if (success) {
                 QMessageBox::information(this, "Success", "Video exported successfully");
             } else {

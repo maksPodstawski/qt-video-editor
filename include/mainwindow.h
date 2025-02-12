@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QStyleFactory>
 #include <QScrollArea>
+#include <QProgressDialog>
 
 
 QT_BEGIN_NAMESPACE
