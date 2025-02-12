@@ -122,7 +122,7 @@
        <item>
         <widget class="QPushButton" name="playPauseButton">
          <property name="text">
-          <string>Play</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -138,7 +138,7 @@
          <item>
           <widget class="QPushButton" name="muteButton">
            <property name="text">
-            <string>Mute</string>
+            <string/>
            </property>
           </widget>
          </item>

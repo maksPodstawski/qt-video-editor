@@ -10,7 +10,8 @@ Indicator::Indicator(QWidget* parent)
 void Indicator::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
-    painter.setBrush(QColor("#34e5eb"));
+    painter.setBrush(QColor("#009E4F"));
+    painter.setPen(Qt::NoPen);
     painter.drawRect(rect());
 }
 

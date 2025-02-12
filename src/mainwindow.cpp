@@ -62,12 +62,24 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
 
+    setupIcons();
     setupShortcuts();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setupIcons()
+{
+    QIcon playIcon("../../resources/icons/play.png");
+    ui->playPauseButton->setIcon(playIcon);
+    ui->playPauseButton->setIconSize(playIcon.actualSize(QSize(24, 24)));
+
+    QIcon volumeUpIcon("../../resources/icons/volume-up.png");
+    ui->muteButton->setIcon(volumeUpIcon);
+    ui->muteButton->setIconSize(volumeUpIcon.actualSize(QSize(24, 24)));
 }
 
 
@@ -80,10 +92,10 @@ void MainWindow::on_playPauseButton_clicked()
 
     if (videoPreviewWidget->getPlaybackState() == QMediaPlayer::PlayingState) {
         videoPreviewWidget->pause();
-        ui->playPauseButton->setText("Play");
+        ui->playPauseButton->setIcon(QIcon("../../resources/icons/play.png"));
     } else {
         videoPreviewWidget->play();
-        ui->playPauseButton->setText("Pause");
+        ui->playPauseButton->setIcon(QIcon("../../resources/icons/pause.png"));
     }
 }
 
@@ -94,7 +106,7 @@ void MainWindow::on_volumeChangeSlider_valueChanged(int value)
     ui->volumeLabel->setText(QString::number(value));
 
     if(volume > 0 && ui->muteButton->text() == "Unmute") {
-        ui->muteButton->setText("Mute");
+        ui->muteButton->setIcon(QIcon("../../resources/icons/volume.png"));
     }
 }
 
@@ -104,12 +116,12 @@ void MainWindow::on_muteButton_clicked()
         previousVolume = videoPreviewWidget->getVolume();
         videoPreviewWidget->setVolume(0.0);
 
-        ui->muteButton->setText("Unmute");
+        ui->muteButton->setIcon(QIcon("../../resources/icons/volume.png"));
         ui->volumeChangeSlider->setValue(0);
     }
     else {
         videoPreviewWidget->setVolume(previousVolume);
-        ui->muteButton->setText("Mute");
+        ui->muteButton->setIcon(QIcon("../../resources/icons/volume-up.png"));
         ui->volumeChangeSlider->setValue(previousVolume * 100);
     }
 }
@@ -306,3 +318,4 @@ void MainWindow::setupShortcuts()
     connect(pauseShortcut, &QShortcut::activated, this, &MainWindow::on_playPauseButton_clicked);
 
 }
+

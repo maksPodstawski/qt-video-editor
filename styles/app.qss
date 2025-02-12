@@ -39,7 +39,7 @@ QPushButton::hover
 
 QPushButton::pressed
 {
-	background-color: #1400EB;
+	background-color: #1E74EC;
 
 }
 
@@ -77,24 +77,23 @@ QSlider::handle:vertical:hover {
 }
 
 QMenuBar {
-    background-color: #3498eb;
+    background-color: #1E1F22;
     color: #FFFFFF;
+    min-height: 20px;
 }
 
 QMenuBar::item:selected {
     background-color: #1E74EC;
     color: #FFFFFF;
-    font-weight: bold;
 }
 
 QMenu::item:selected {
     color: #FFFFFF;
-    font-weight: bold;
     background-color: #1E74EC;
 }
 
 QMenu {
-    background-color: #3498eb;
+    background-color: #1E1F22;
     color: #FFFFFF;
 }
 
@@ -119,4 +118,47 @@ QLabel#timeLabel {
     font-size: 24px;
     font-weight: bold;
     qproperty-alignment: 'AlignCenter';
+}
+
+
+QProgressDialog {
+    color: #FFFFFF;
+    padding: 10px;
+}
+
+QProgressDialog QLabel {
+    color: #FFFFFF;
+}
+
+QProgressDialog QPushButton {
+    color: #FFFFFF;
+    padding: 5px 10px;
+}
+
+QPushButton#playPauseButton {
+     background-color: #3498EB;
+}
+
+QLineEdit {
+    background-color: #2B2D30;
+    color: #FFFFFF;
+    border: 1px solid #3498eb;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+QLineEdit:focus {
+    border: 1px solid #1E74EC;
+}
+
+QSpinBox {
+    background-color: #2B2D30;
+    color: #FFFFFF;
+    border: 1px solid #3498eb;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+QSpinBox:focus {
+    border: 1px solid #1E74EC;
 }

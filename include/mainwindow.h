@@ -65,6 +65,7 @@ private:
 
     void updateDurationLabel();
     void setupShortcuts();
+    void setupIcons();
 
 protected:
     void closeEvent(QCloseEvent* event) override;

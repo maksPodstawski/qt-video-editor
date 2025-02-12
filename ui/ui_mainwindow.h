@@ -97,7 +97,7 @@ public:
         timeLineScrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1250, 200));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 1248, 198));
         timeLineScrollArea->setWidget(scrollAreaWidgetContents);
         layoutWidget = new QWidget(centralwidget);
         layoutWidget->setObjectName("layoutWidget");
@@ -186,9 +186,9 @@ public:
         groupBoxVideo->setTitle(QString());
         timeLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
         groupBoxVideosTable->setTitle(QString());
-        playPauseButton->setText(QCoreApplication::translate("MainWindow", "Play", nullptr));
+        playPauseButton->setText(QString());
         volumeLabel->setText(QString());
-        muteButton->setText(QCoreApplication::translate("MainWindow", "Mute", nullptr));
+        muteButton->setText(QString());
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuOptions->setTitle(QCoreApplication::translate("MainWindow", "Options", nullptr));
     } // retranslateUi
